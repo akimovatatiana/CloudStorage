@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block main %}
+
+        <div class="mw6 center pa3 sans-serif">
+        {% for user in users %}
+            <h3 class="mb4">User id: {{ user.id }}</h3>
+
+            <h3 class="mb4">User: {{ user.username }}</h3>
+
+            <p class="b mb2">Password: {{ user.password }}</p>
+
+        {% endfor %}
+
+
+        </div>
+
+{% endblock %}
