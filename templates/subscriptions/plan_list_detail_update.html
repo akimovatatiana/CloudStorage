@@ -1,0 +1,26 @@
+{% extends 'subscriptions/base_developer.html' %}
+
+{% load i18n %}
+
+{% block title %}DFS Dashboard | Update Subscription Plan{% endblock %}
+
+{% block main %}
+  <div class="breadcrumb">
+    <a href="{% url 'dfs_dashboard' %}">Developer Dashboard</a>
+    > <a href="{% url 'dfs_plan_list_list' %}">Plans Lists</a>
+    > <a href="{% url 'dfs_plan_list_detail_list' plan_list.id %}">{{ plan }}</a>
+    > Update Subscription Plan
+  </div>
+
+  <h2>Update Subscription Plan</h1>
+
+  <form method="post">
+    {% csrf_token %}
+
+    {% include 'subscriptions/snippets/form_table.html' with form=form %}
+
+    <input type="submit" class="button-positive" value="Save">
+  </form>
+
+  <a class="button-negative" href="{% url 'dfs_plan_list_detail_list' plan_list.id %}">Cancel</a>
+{% endblock %}

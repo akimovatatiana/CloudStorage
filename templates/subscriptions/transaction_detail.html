@@ -1,0 +1,38 @@
+{% extends 'subscriptions/base_developer.html' %}
+
+{% load i18n %}
+{% load currency_filters %}
+
+{% block title %}DFS Dashboard | Transaction Detail{% endblock %}
+
+{% block main %}
+  <div class="breadcrumb">
+    <a href="{% url 'dfs_dashboard' %}">Developer Dashboard</a>
+    > <a href="{% url 'dfs_transaction_list' %}">Transactions</a>
+    > Transaction Detail
+  </div>
+
+  <h2>Transaction Detail</h2>
+
+  <div>
+    <strong>{% trans "User" %}:</strong>
+    {% if transaction.user %}{{ transaction.user }}{% else %}No user{% endif %}
+  </div>
+
+  <div>
+    <strong>{% trans "Plan" %}:</strong>
+    {% if transaction.subscription %}{{ transaction.subscription.plan }}{% else %}No subscription plan{% endif %}
+  </div>
+
+  <div>
+    <strong>{% trans "Transaction date" %}:</strong>
+    {{ transaction.date_transaction }}
+  </div>
+
+  <div>
+    <strong>{% trans "Amount" %}:</strong>
+    {% if transaction.amount %}{{ transaction.amount|currency }}{% else %}{{ 0|currency }}{% endif %}
+  </div>
+
+  <div><br><a href="{% url 'dfs_transaction_list' %}">Back to Transactions</a></div>
+{% endblock %}
