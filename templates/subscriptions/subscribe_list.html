@@ -1,0 +1,32 @@
+{% extends template_extends %}
+
+{% load i18n %}
+
+{% block title %}Subscribe{% endblock %}
+
+{% block content %}
+  <main class="subscribe-container">
+    <h1>{{ plan_list.title|safe }}</h1>
+
+{#    <span class="subtitle">{{ plan_list.subtitle|safe }}</span>#}
+{##}
+{#    <div class="header">{{ plan_list.header|safe }}</div>#}
+
+    <div class="plans">
+      {% for detail in details %}
+        <div class="plan">
+          {{ detail.plan }}
+          {{ detail.html_content|safe }}
+
+          <form method="post" action="{% url 'dfs_subscribe_add' %}">
+            {% csrf_token %}
+            <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
+            <button type="submit" class="button-positive">{{ detail.subscribe_button_text|safe }}</button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+
+{#    <div class="footer">{{ plan_list.footer|safe }}</div>#}
+  </main>
+{% endblock %}
