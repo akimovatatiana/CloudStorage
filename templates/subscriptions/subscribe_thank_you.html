@@ -1,0 +1,15 @@
+{% extends template_extends %}
+
+{% load i18n %}
+
+{% block title %}Subscribe | Thank You{% endblock %}
+
+{% block content %}
+  <main class="subscribe-container">
+    <h1>Successfully subscribed!</h1>
+
+    <p>You have been successfully subscribed!</p>
+
+    <p>You may save your transaction ID for your records: {{ transaction.id }}</p>
+  </main>
+{% endblock %}

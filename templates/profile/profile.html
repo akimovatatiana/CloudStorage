@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block main %}
+
+        <div class="mw6 center pa3 sans-serif">
+
+            <h1 class="mb4">User: {{ user.username }}</h1>
+
+            <h3 class="mb4">First Name: {{ user.first_name }}</h3>
+
+            <h3 class="mb4">Last Name: {{ user.last_name }}</h3>
+
+            <h3 class="mb4">Email: {{ user.email }}</h3>
+
+        </div>
+
+{% endblock %}

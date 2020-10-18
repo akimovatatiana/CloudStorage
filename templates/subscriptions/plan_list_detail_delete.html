@@ -1,0 +1,30 @@
+{% extends 'subscriptions/base_developer.html' %}
+
+{% load i18n %}
+
+{% block title %}DFS Dashboard | Remove Subscription Plan{% endblock %}
+
+{% block main %}
+  <div class="breadcrumb">
+    <a href="{% url 'dfs_dashboard' %}">Developer Dashboard</a>
+    > <a href="{% url 'dfs_plan_list_list' %}">Plans Lists</a>
+    > <a href="{% url 'dfs_plan_list_detail_list' plan_list.id %}">{{ plan_list }}</a>
+    > Remove Subscription Plan
+  </div>
+
+  <h2>Remove Subscription Plan</h2>
+
+  <div>Are you sure you want to remove this plan from the plan list?</div>
+
+  <blockquote>
+    <strong>Plan List:</strong> {{ plan_list_detail.plan_list }}<br>
+    <strong>Subscription Plan:</strong> {{ plan_list_detail.plan.plan_name }}<br>
+  </blockquote>
+
+  <form method="POST">
+    {% csrf_token %}
+    <input class="button-negative" type="submit" value="Delete">
+  </form>
+
+  <a class="button-positive" href="{% url 'dfs_plan_list_detail_list' plan_list.id %}">Cancel</a>
+{% endblock %}
