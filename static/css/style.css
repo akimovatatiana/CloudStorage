@@ -1,0 +1,64 @@
+.header {
+    padding-left: 150px;
+    padding-right: 150px;
+    height: 80px;
+    background-color: #f7fbff;
+}
+
+.header .header__title {
+    margin-right: 30px; 
+    padding-top: 0;
+    padding-right: 30px;
+    background-image: url(../../templates/snippets/cloud.png);
+    background-repeat: no-repeat;
+    background-position: right;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.dropdown-toggle::after {
+    width: 5px;
+    height: 5px;
+    border-top: 1px solid #444;
+    border-left: none;
+    border-right: 1px solid #444;
+    -webkit-transform: rotate(135deg);
+    transform: rotate(135deg);
+}
+
+.header .header__button-signup {
+    height: 45px;
+    width: 130px;
+    font-weight: 600;
+}
+
+.header .header__button-signup:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.header .header__button-login {
+    margin-right: 15px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.header .header__links {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.header .header__links li {
+    margin-right: 30px;
+}
+
+@media screen and (max-width: 1070px)
+{
+    .header
+    {
+        padding-left: 100px;
+        padding-right: 100px;
+    }
+}
+
+/* Plan cards styles */

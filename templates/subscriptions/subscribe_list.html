@@ -1,5 +1,6 @@
 {% extends template_extends %}
 
+{% load static %}
 {% load i18n %}
 
 {% block title %}Subscribe{% endblock %}
@@ -7,7 +8,6 @@
 {% block content %}
   <main class="subscribe-container">
     <h1>{{ plan_list.title|safe }}</h1>
-
 {#    <span class="subtitle">{{ plan_list.subtitle|safe }}</span>#}
 {##}
 {#    <div class="header">{{ plan_list.header|safe }}</div>#}
