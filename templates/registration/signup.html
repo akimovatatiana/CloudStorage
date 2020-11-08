@@ -1,14 +1,17 @@
 {% extends 'base.html' %}
 {% load crispy_forms_filters %}
 
-{% block title %}Sign Up{% endblock %}
+{% block title %}Sign Up - CloudStorage{% endblock %}
 
 {% block main %}
-  <h2>Sign up</h2>
+    <div class="signup-card">
+  <h2 class="signup-card__title">Sign up</h2>
   <form method="post">
       {% csrf_token %}
       {{ form|crispy }}
 
       <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
   </form>
+  </div>
+
 {% endblock %}

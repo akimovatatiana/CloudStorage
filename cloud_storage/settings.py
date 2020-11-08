@@ -134,7 +134,8 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, '/')
 STATICFILES_DIRS = [
     #os.path.join(BASE_DIR, "/users/static"),
-    "/Users/user/dev/CloudStorage/static/"
+    # path to static directory in project
+    "/Users/GOMER/source/repos/python/CloudStorage/static/"
 ]
 
 LOGIN_REDIRECT_URL = '/users/profile/'

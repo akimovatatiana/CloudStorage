@@ -3,7 +3,7 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}Subscribe{% endblock %}
+{% block title %}Subscribe - CloudStorage{% endblock %}
 
 {% block content %}
   <main class="subscribe-container">
@@ -17,11 +17,13 @@
         <div class="plan">
           {{ detail.plan }}
           {{ detail.html_content|safe }}
-
+          <div class="plan__description">
+            {{ detail.plan.plan_description }}
+          </div>
           <form method="post" action="{% url 'dfs_subscribe_add' %}">
             {% csrf_token %}
             <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
-            <button type="submit" class="button-positive">{{ detail.subscribe_button_text|safe }}</button>
+            <button type="submit" class="button-positive plan__button">{{ detail.subscribe_button_text|safe }}</button>
           </form>
         </div>
       {% endfor %}
