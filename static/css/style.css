@@ -36,6 +36,13 @@ body {
     height: 45px;
     width: 130px;
     font-weight: 600;
+    text-decoration: none;
+}
+
+.header .header__button-signup span {
+    display: block;
+    padding-top: 3px;
+    text-decoration: none;
 }
 
 .header .header__button-signup:focus {

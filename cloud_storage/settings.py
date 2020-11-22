@@ -131,11 +131,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, '/')
+STATIC_PATH = os.path.abspath(BASE_DIR) + STATIC_URL
 STATICFILES_DIRS = [
-    #os.path.join(BASE_DIR, "/users/static"),
-    # path to static directory in project
-    "/Users/GOMER/source/repos/python/CloudStorage/static/"
+    STATIC_PATH
 ]
 
 LOGIN_REDIRECT_URL = '/users/profile/'

@@ -43,9 +43,33 @@ def signup(request):
             form.save()
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
+            plan_name = request.POST.get('plan_name', '')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
-            return redirect('profile')
+
+            redirect_path = ''
+
+            if plan_name == 'Basic':
+                redirect_path = 'basic'
+            elif plan_name == 'Standard':
+                redirect_path = 'standard-subscription-payment'
+            elif plan_name == 'Premium':
+                redirect_path = 'premium-subscription-payment'
+
+            if redirect_path != '':
+                return redirect(redirect_path)
+            else:
+                return redirect('dfs_subscribe_list')
+
+            # return redirect('dfs_subscribe_add')
     else:
         form = UserSignUpForm()
+
     return render(request, 'registration/signup.html', {'form': form})
+
+
+def payment(request):
+    if request.method == 'POST':
+        plan_name = request.POST.get('plan_name', '')
+
+        if plan_name == 'Standard':
