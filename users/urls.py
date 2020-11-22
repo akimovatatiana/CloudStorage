@@ -9,4 +9,7 @@ urlpatterns = [
     path('profile/', redirect_user, name="profile"),
     path('all/', get_all_users, name="all_users"),
     path('signup/', signup, name='signup'),
+    path('signup-free/', signup, name='signup-free'),
+    path('signup-standard/', signup, name='signup-standard'),
+    path('signup-premium/', signup, name='signup-premium')
 ]

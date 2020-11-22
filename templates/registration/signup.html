@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load crispy_forms_filters %}
 
+{% load i18n %}
+
 {% block title %}Sign Up - CloudStorage{% endblock %}
 
 {% block main %}
@@ -9,8 +11,12 @@
   <form method="post">
       {% csrf_token %}
       {{ form|crispy }}
-
-      <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+      <form method="post" action="{% url 'dfs_subscribe_add' %}">
+            {% csrf_token %}
+            <input type="hidden" name="plan_id" value="c5f70d97-08ae-46e8-a75a-782fa8a706e3">
+            <button type="submit" class="btn btn-primary btn-block button-positive">{{ "Sign Up"|safe }}</button>
+      </form>
+{#      <button type="submit" class="btn btn-primary btn-block">Sign Up</button>#}
   </form>
   </div>
 

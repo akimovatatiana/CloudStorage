@@ -20,11 +20,27 @@
           <div class="plan__description">
             {{ detail.plan.plan_description }}
           </div>
-          <form method="post" action="{% url 'dfs_subscribe_add' %}">
-            {% csrf_token %}
-            <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
-            <button type="submit" class="button-positive plan__button">{{ detail.subscribe_button_text|safe }}</button>
-          </form>
+            {% if detail.plan.plan_name == "Basic" %}
+                <form method="post" action="{% url 'signup-free' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
+                    <button type="submit" class="button-positive plan__button">{{ detail.subscribe_button_text|safe }}</button>
+                </form>
+            {% endif %}
+            {% if detail.plan.plan_name == "Standart" %}
+                <form method="post" action="{% url 'signup-standard' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
+                    <button type="submit" class="button-positive plan__button">{{ detail.subscribe_button_text|safe }}</button>
+                </form>
+            {% endif %}
+            {% if detail.plan.plan_name == "Premium" %}
+                <form method="post" action="{% url 'signup-premium' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
+                    <button type="submit" class="button-positive plan__button">{{ detail.subscribe_button_text|safe }}</button>
+                </form>
+            {% endif %}
         </div>
       {% endfor %}
     </div>
