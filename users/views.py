@@ -6,12 +6,12 @@ from .forms import *
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, reverse
-
+from django.shortcuts import get_object_or_404
+from subscriptions import models
 
 import requests
 
 from subscriptions import views as sub_views
-
 
 def get_user(request, pk):
     user_obj = User.objects.get(pk=pk)
@@ -43,29 +43,35 @@ def get_all_users(request):
 def redirect_user(request):
     return get_user(request, pk=request.user.pk)
 
-
 def signup(request):
     plan_id = request.POST.get('plan_id', '')
+    plan_name = request.POST.get('plan_name', '')
     redirect_from = request.POST.get('redirect_from', '')
-    print(redirect_from)
+
+    print(plan_name)
+    plan = get_object_or_404(
+        models.SubscriptionPlan, plan_name=plan_name
+    )
+    print(plan.id)
+
     if request.method == 'POST' and plan_id != '' and redirect_from == 'signup':
         form = UserSignUpForm(request.POST)
-        print(redirect_from)
         if form.is_valid():
             form.save()
-
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
-
-            # redirect('signup-free-payment')
-
+            return sub_views.SubscribeView.as_view()(request)
     else:
         form = UserSignUpForm()
 
-    return render(request, 'registration/signup.html', {'form': form})
 
-
-def payment(request):
-    pass
+    if plan_name == 'Basic':
+        return render(request, 'registration/signup-basic.html', {'form': form})
+    elif plan_name == 'Standard':
+        return render(request, 'registration/signup-standard.html', {'form': form})
+    elif plan_name == 'Premium':
+        return render(request, 'registration/signup-premium.html', {'form': form})
+    else:
+        return render(request, 'registration/signup-basic.html', {'form': form})

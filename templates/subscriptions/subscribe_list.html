@@ -21,17 +21,21 @@
             {{ detail.plan.plan_description }}
           </div>
             {% if detail.plan.plan_name == "Basic" %}
-                <form method="post" action="{% url 'signup-free' %}">
+                <form method="post" action="{% url 'signup-basic' %}">
                     {% csrf_token %}
                     <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
+                    <input type="hidden" name="plan_name" value="{{ detail.plan.plan_name }}">
                     <input type="hidden" name="redirect_from" value="subscribe_list">
+
                     <button type="submit" class="button-positive plan__button">{{ detail.subscribe_button_text|safe }}</button>
                 </form>
             {% endif %}
-            {% if detail.plan.plan_name == "Standart" %}
+            {% if detail.plan.plan_name == "Standard" %}
                 <form method="post" action="{% url 'signup-standard' %}">
                     {% csrf_token %}
                     <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
+                    <input type="hidden" name="plan_name" value="{{ detail.plan.plan_name }}">
+                    <input type="hidden" name="redirect_from" value="subscribe_list">
                     <button type="submit" class="button-positive plan__button">{{ detail.subscribe_button_text|safe }}</button>
                 </form>
             {% endif %}
@@ -39,6 +43,8 @@
                 <form method="post" action="{% url 'signup-premium' %}">
                     {% csrf_token %}
                     <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
+                    <input type="hidden" name="plan_name" value="{{ detail.plan.plan_name }}">
+                    <input type="hidden" name="redirect_from" value="subscribe_list">
                     <button type="submit" class="button-positive plan__button">{{ detail.subscribe_button_text|safe }}</button>
                 </form>
             {% endif %}
@@ -46,7 +52,7 @@
       {% endfor %}
     </div>
 
-  <div class="plans">
+  <!--<div class="plans">
       {% for detail in details %}
         <div class="plan">
           {{ detail.plan }}
@@ -59,7 +65,7 @@
           </form>
         </div>
       {% endfor %}
-    </div>
+    </div> -->
 
 {#    <div class="footer">{{ plan_list.footer|safe }}</div>#}
   </main>
