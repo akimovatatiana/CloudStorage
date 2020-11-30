@@ -6,18 +6,19 @@
 {% block title %}Sign Up - CloudStorage{% endblock %}
 
 {% block main %}
-    <div class="signup-card">
-  <h2 class="signup-card__title">Sign up</h2>
-  <form method="post">
-      {% csrf_token %}
-      {{ form|crispy }}
-      <form method="post" action="{% url 'dfs_subscribe_add' %}">
-            {% csrf_token %}
-            <input type="hidden" name="plan_id" value="c5f70d97-08ae-46e8-a75a-782fa8a706e3">
-            <button type="submit" class="btn btn-primary btn-block button-positive">{{ "Sign Up"|safe }}</button>
-      </form>
-{#      <button type="submit" class="btn btn-primary btn-block">Sign Up</button>#}
-  </form>
-  </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="signup-card">
+            <h2 class="signup-card__title">Sign up</h2>
+{#            <form method="post" action="{% url 'dfs_subscribe_add' %}">#}
+{#                {% csrf_token %}#}
+            {{ form|crispy }}
+            <input type="hidden" name="plan_id" value="439f2a75-5d03-4e8b-89a2-c7e705d185f6">
+            <input type="hidden" name="redirect_from" value="signup">
+            <button type="submit" class="button-positive">{{ "Sign Up"|safe }}</button>
+                {#      <button type="submit" class="btn btn-primary btn-block">Sign Up</button>#}
+{#            </form>#}
+        </div>
+    </form>
 
 {% endblock %}

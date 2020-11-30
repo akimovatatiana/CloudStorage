@@ -1,8 +1,16 @@
+from django.http import HttpRequest, HttpResponse
+from django.http import QueryDict
+
 from .forms import *
 
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
+
+
+import requests
+
+from subscriptions import views as sub_views
 
 
 def get_user(request, pk):
@@ -37,31 +45,22 @@ def redirect_user(request):
 
 
 def signup(request):
-    if request.method == 'POST':
+    plan_id = request.POST.get('plan_id', '')
+    redirect_from = request.POST.get('redirect_from', '')
+    print(redirect_from)
+    if request.method == 'POST' and plan_id != '' and redirect_from == 'signup':
         form = UserSignUpForm(request.POST)
+        print(redirect_from)
         if form.is_valid():
             form.save()
+
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
-            plan_name = request.POST.get('plan_name', '')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
 
-            redirect_path = ''
+            # redirect('signup-free-payment')
 
-            if plan_name == 'Basic':
-                redirect_path = 'basic'
-            elif plan_name == 'Standard':
-                redirect_path = 'standard-subscription-payment'
-            elif plan_name == 'Premium':
-                redirect_path = 'premium-subscription-payment'
-
-            if redirect_path != '':
-                return redirect(redirect_path)
-            else:
-                return redirect('dfs_subscribe_list')
-
-            # return redirect('dfs_subscribe_add')
     else:
         form = UserSignUpForm()
 
@@ -69,7 +68,4 @@ def signup(request):
 
 
 def payment(request):
-    if request.method == 'POST':
-        plan_name = request.POST.get('plan_name', '')
-
-        if plan_name == 'Standard':
+    pass

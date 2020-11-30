@@ -10,6 +10,7 @@ urlpatterns = [
     path('all/', get_all_users, name="all_users"),
     path('signup/', signup, name='signup'),
     path('signup-free/', signup, name='signup-free'),
+    path('signup-free/payment', sub_views.SubscribeView.as_view(), name='signup-free-payment'),
     path('signup-standard/', signup, name='signup-standard'),
     path('signup-premium/', signup, name='signup-premium')
 ]
