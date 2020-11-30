@@ -1,7 +1,12 @@
-asgiref==3.2.10
-Django==3.1.2
+asgiref==3.3.0
+certifi==2020.11.8
+chardet==3.0.4
+Django==3.1.3
 django-crispy-forms==1.9.2
 django-flexible-subscriptions==0.15.1
-psycopg2==2.8.6
-pytz==2020.1
+idna==2.10
+psycopg2-binary==2.8.6
+pytz==2020.4
+requests==2.25.0
 sqlparse==0.4.1
+urllib3==1.26.2
