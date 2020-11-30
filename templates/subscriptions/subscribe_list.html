@@ -24,6 +24,7 @@
                 <form method="post" action="{% url 'signup-free' %}">
                     {% csrf_token %}
                     <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
+                    <input type="hidden" name="redirect_from" value="subscribe_list">
                     <button type="submit" class="button-positive plan__button">{{ detail.subscribe_button_text|safe }}</button>
                 </form>
             {% endif %}
@@ -41,6 +42,21 @@
                     <button type="submit" class="button-positive plan__button">{{ detail.subscribe_button_text|safe }}</button>
                 </form>
             {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+  <div class="plans">
+      {% for detail in details %}
+        <div class="plan">
+          {{ detail.plan }}
+          {{ detail.html_content|safe }}
+
+          <form method="post" action="{% url 'dfs_subscribe_add' %}">
+            {% csrf_token %}
+            <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
+            <button type="submit" class="button-positive">{{ detail.subscribe_button_text|safe }}</button>
+          </form>
         </div>
       {% endfor %}
     </div>
