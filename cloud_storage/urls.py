@@ -21,8 +21,6 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('subscriptions/', include('subscriptions.urls')),
-    # path('standard-subscription-payment', payment, name='standard-payment'),
-    # path('premium-subscription-payment', payment, name='premium-payment'),
     path('users/', include('users.urls')),
-
+    path('storage/', include('storage.urls'))
 ]

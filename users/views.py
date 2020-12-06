@@ -13,6 +13,7 @@ import requests
 
 from subscriptions import views as sub_views
 
+
 def get_user(request, pk):
     user_obj = User.objects.get(pk=pk)
 
@@ -43,6 +44,7 @@ def get_all_users(request):
 def redirect_user(request):
     return get_user(request, pk=request.user.pk)
 
+
 def signup(request):
     plan_id = request.POST.get('plan_id', '')
     plan_name = request.POST.get('plan_name', '')
@@ -65,7 +67,6 @@ def signup(request):
             return sub_views.SubscribeView.as_view()(request)
     else:
         form = UserSignUpForm()
-
 
     if plan_name == 'Basic':
         return render(request, 'registration/signup-basic.html', {'form': form})
