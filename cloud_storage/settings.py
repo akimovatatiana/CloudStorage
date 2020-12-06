@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'subscriptions',
     'crispy_forms',
-    'users'
+    'users',
+    'storage'
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -146,4 +147,5 @@ PATH_TO_TEMPLATES = os.path.join(PATH_TO_SETTINGS, os.pardir) + '/templates/subs
 
 DFS_BASE_TEMPLATE = PATH_TO_TEMPLATES
 
-
+STORAGE_URL = '/storage/'
+STORAGE_ROOT = os.path.join(BASE_DIR, 'storage')
