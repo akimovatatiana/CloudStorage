@@ -12,16 +12,17 @@
 {% block main %}
     <div style="margin-top: 100px">
 
-        <form method="post">
-            <button type="button" class="btn btn-primary js-upload-files">
-              <span class="glyphicon glyphicon-cloud-upload"></span> Upload files
-            </button>
 
-            <input id="fileupload" type="file" name="file" multiple
-                   style="display: none;"
-                   data-url="{% url 'upload' %}"
-                   data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
-        </form>
+        <button type="button" class="btn btn-primary js-upload-files">
+          <span class="glyphicon glyphicon-cloud-upload"></span> Upload files
+        </button>
+        <input id="fileupload" type="file" name="file" multiple
+               style="display: none;"
+               data-url="{% url 'upload' %}"
+               data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}", "user": "{{ user.id }}"}'>
+<!-- , "title": "mytitle" -->
+
+
 
         <table id="files-list" class="table table-bordered">
           <thead>

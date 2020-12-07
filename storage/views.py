@@ -15,14 +15,21 @@ class UploadView(View):
         return render(self.request, 'storage/upload.html', {'files': files_list})
 
     def post(self, request):
-        form = FileForm(self.request.POST, self.request.FILES)
-        user_id = self.request.POST.get('user_id', '')
+        post = request.POST.copy()  # to make it mutable
+
+        #post.update({'title': request.FILES})
+        print(str(request.FILES.keys))
+        form = FileForm(post, self.request.FILES)
+
+        #form.cleaned_data['title'] = 'hello'
         if form.is_valid():
             file = form.save()
+
             data = {'is_valid': True, 'name': file.file.name, 'url': file.file.url}
         else:
             data = {'is_valid': False}
 
+        print(form.errors)
         return JsonResponse(data)
 
 
