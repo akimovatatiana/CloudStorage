@@ -12,9 +12,11 @@
 
 {% block main %}
     <div>
+        <div style="display: inline-block"><span class="text-muted">Cloud Storage usage: {{ used_size }} / {{ capacity }} mb</span></div>
+
         <div class="well text-muted text-center" style="padding-top: 4rem; padding-bottom: 4rem;">
             <span class="glyphicon glyphicon-arrow-down" style="font-size: 4rem;"></span>
-            <h3>Drop Photos Here to Upload</h3>
+            <h3>Drop Files Here to Upload</h3>
         </div>
 
         <button type="button" class="btn btn-primary js-upload-files">
