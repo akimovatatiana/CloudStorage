@@ -11,3 +11,4 @@ class File(models.Model):
     title = models.CharField(max_length=255)
     file = models.FileField(upload_to=get_upload_path)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    size = models.CharField(max_length=255)
