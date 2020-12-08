@@ -1,16 +1,11 @@
-from django.http import HttpRequest, HttpResponse
-from django.http import QueryDict
-
 from .forms import *
 
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, reverse
 from django.shortcuts import get_object_or_404
+
 from subscriptions import models
-
-import requests
-
 from subscriptions import views as sub_views
 
 
@@ -50,29 +45,20 @@ def signup(request):
     plan_name = request.POST.get('plan_name', '')
     redirect_from = request.POST.get('redirect_from', '')
 
-    print(plan_name)
-    plan = get_object_or_404(
-        models.SubscriptionPlan, plan_name=plan_name
-    )
-    print(plan.id)
-
     if request.method == 'POST' and plan_id != '' and redirect_from == 'signup':
         form = UserSignUpForm(request.POST)
+
         if form.is_valid():
             form.save()
+
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
+
             login(request, user)
+
             return sub_views.SubscribeView.as_view()(request)
     else:
         form = UserSignUpForm()
 
-    if plan_name == 'Basic':
-        return render(request, 'registration/signup-basic.html', {'form': form})
-    elif plan_name == 'Standard':
-        return render(request, 'registration/signup-standard.html', {'form': form})
-    elif plan_name == 'Premium':
-        return render(request, 'registration/signup-premium.html', {'form': form})
-    else:
-        return render(request, 'registration/signup-basic.html', {'form': form})
+    return render(request, f'registration/signup-{plan_name.lower()}.html', {'form': form})
