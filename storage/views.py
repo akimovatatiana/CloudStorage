@@ -9,13 +9,7 @@ from .forms import FileForm
 from .models import File
 
 
-def reformat_size(value):
-    """
-    Simple kb/mb/gb size snippet for templates:
-
-    {{ product.file.size|sizify }}
-    """
-    # value = ing(value)
+def beautify_size(value):
     if value < 512000:
         value = value / 1024.0
         ext = 'kb'
@@ -36,22 +30,23 @@ class UploadView(View):
 
     def post(self, request):
         post = request.POST.copy()
-        post.update({'title': str(request.FILES['file'])})
+        post.update({'title': str(request.FILES['file']), 'size': '0 kb'})
 
         form = FileForm(post, self.request.FILES)
 
         if form.is_valid():
             form_with_unique_filename = form.save()
 
-            # Get unique filename from disk
+            # Get unique filename from disk, add to form
             filename = path.split(str(form_with_unique_filename.file.url))[-1]
             form_with_unique_filename.title = filename
 
-            form_with_unique_filename.save()
-
+            # Add file size to form
             file_path = str(settings.BASE_DIR) + form_with_unique_filename.file.url
-            file_size = reformat_size(path.getsize(file_path))
-            print(file_size)
+            file_size = beautify_size(path.getsize(file_path))
+            form_with_unique_filename.size = file_size
+
+            form_with_unique_filename.save()
 
             data = {'is_valid': True, 'name': form_with_unique_filename.file.name,
                     'url': form_with_unique_filename.file.url}
@@ -63,7 +58,7 @@ class UploadView(View):
 
 def remove_file(request):
     pk = request.POST.get('pk', '')
-    query = File.objects.get(pk=pk)
-    query.delete()
+    file = File.objects.get(pk=pk)
+    file.delete()
 
     return redirect('upload')
