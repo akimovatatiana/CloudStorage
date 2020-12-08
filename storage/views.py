@@ -8,6 +8,9 @@ from django.views import View
 from .forms import FileForm
 from .models import File
 
+from subscriptions.models import UserSubscription
+from storage_subscriptions.models import StorageSubscription
+
 
 def beautify_size(value):
     if value < 512000:
@@ -22,15 +25,56 @@ def beautify_size(value):
     return '%s %s' % (str(round(value, 2)), ext)
 
 
+def get_used_size(files_list):
+    used_size = 0
+    for file in files_list:
+        file_path = str(settings.BASE_DIR) + file.file.url
+        size = path.getsize(file_path)
+
+        used_size += size
+
+    return used_size
+
+
+def get_storage_capacity(request):
+    user = request.user
+    user_subscription = UserSubscription.objects.get_queryset()
+    user_plan_id = user_subscription.filter(user=user)[0].subscription.plan_id
+
+    storage_subscriptions = StorageSubscription.objects.filter(subscription=user_plan_id)
+    max_size = storage_subscriptions[0].size
+
+    return max_size
+
+
+def is_new_file_fit_in_storage(request):
+    capacity = get_storage_capacity(request)
+    user_id = request.user.id
+
+    files_list = File.objects.filter(user=user_id)
+    used_size = get_used_size(files_list) / 1048576.0
+
+    new_file_size = request.FILES['file'].size / 1048576.0
+    new_used_size = new_file_size + used_size
+
+    return new_used_size <= capacity
+
+
 class UploadView(View):
     def get(self, request):
         user_id = request.user.id
 
         if user_id is not None:
             files_list = File.objects.filter(user=user_id)
+            used_size = beautify_size(get_used_size(files_list))
+            capacity = get_storage_capacity(request)
 
-            return render(self.request, 'storage/upload.html', {'files': files_list})
-        else :
+            return render(self.request, 'storage/upload.html',
+                          {'files': files_list,
+                           'used_size': used_size,
+                           'capacity': capacity}
+                          )
+        else:
             return redirect('dfs_subscribe_list')
 
     def post(self, request):
@@ -39,7 +83,7 @@ class UploadView(View):
 
         form = FileForm(post, self.request.FILES)
 
-        if form.is_valid():
+        if form.is_valid() and is_new_file_fit_in_storage(request):
             form_with_unique_filename = form.save()
 
             # Get unique filename from disk, add to form
