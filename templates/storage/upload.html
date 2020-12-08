@@ -2,41 +2,51 @@
 {% load static %}
 
 {% block javascript %}
-  <script src="{% static 'js/jquery-file-upload/vendor/jquery.ui.widget.js' %}"></script>
-  <script src="{% static 'js/jquery-file-upload/jquery.iframe-transport.js' %}"></script>
-  <script src="{% static 'js/jquery-file-upload/jquery.fileupload.js' %}"></script>
+    <script src="{% static 'js/jquery-file-upload/vendor/jquery.ui.widget.js' %}"></script>
+    <script src="{% static 'js/jquery-file-upload/jquery.iframe-transport.js' %}"></script>
+    <script src="{% static 'js/jquery-file-upload/jquery.fileupload.js' %}"></script>
 
-  <script src="{% static 'js/file-upload/upload.js' %}"></script>
+    <script src="{% static 'js/file-upload/upload.js' %}"></script>
 {% endblock %}
 
 {% block main %}
     <div style="margin-top: 100px">
-
-
         <button type="button" class="btn btn-primary js-upload-files">
-          <span class="glyphicon glyphicon-cloud-upload"></span> Upload files
+            <span class="glyphicon glyphicon-cloud-upload">Upload files</span>
         </button>
         <input id="fileupload" type="file" name="file" multiple
                style="display: none;"
                data-url="{% url 'upload' %}"
                data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}", "user": "{{ user.id }}"}'>
-<!-- , "title": "mytitle" -->
 
-
-
-        <table id="files-list" class="table table-bordered">
-          <thead>
-            <tr>
-              <th>File</th>
-            </tr>
-          </thead>
-          <tbody>
+        <table id="files-list" class="table table-striped">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Preview</th>
+                    <th scope="col">File</th>
+                    <th scope="col">Uploaded at</th>
+                    <th scope="col">Action</th>>
+                </tr>
+            </thead>
+            <tbody>
             {% for file in files %}
-              <tr>
-                <td><a href="{{ file.file.url }}">{{ file.file.name }}</a></td>
-              </tr>
+                <tr>
+                    <td><img width="100px" height="100px" src="../..{{ file.file.url }}" /></td>
+                    <td><a href="{{ file.file.url }}">{{ file.title }} {{ file.file.content_type }}</a></td>
+                    <td><span>{{ file.uploaded_at }}</span></td>
+                    <td>
+                        <div>
+                            <form action="{% url 'remove-file' %}" method="POST">
+                                {% csrf_token %}
+
+                                <button class="btn btn-danger" type="submit">Delete</button>
+                                <input type="hidden" name="pk" value="{{ file.pk }}">
+                            </form>
+                        </div>
+                    <td>
+                </tr>
             {% endfor %}
-          </tbody>
+            </tbody>
         </table>
     </div>
 {% endblock %}
