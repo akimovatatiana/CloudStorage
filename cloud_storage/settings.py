@@ -16,7 +16,7 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-#print(BASE_DIR)
+# print(BASE_DIR)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
@@ -142,7 +142,7 @@ LOGOUT_REDIRECT_URL = '/users/login/'
 
 DFS_CURRENCY_LOCALE = 'en_us'
 
-PATH_TO_SETTINGS = os.path.dirname(os.path.realpath(__file__ ))
+PATH_TO_SETTINGS = os.path.dirname(os.path.realpath(__file__))
 PATH_TO_TEMPLATES = os.path.join(PATH_TO_SETTINGS, os.pardir) + '/templates/subscriptions/base.html'
 
 DFS_BASE_TEMPLATE = PATH_TO_TEMPLATES

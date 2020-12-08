@@ -1,6 +1,12 @@
 {% load static %}
 <nav class="navbar navbar-expand-lg navbar-light header">
-  <a class="navbar-brand header__title" href="/subscriptions/subscribe">Cloud Storage</a>
+  <a class="navbar-brand header__title"
+     href={% if not user.is_authenticated %}"/subscriptions/subscribe"
+     {% else %}
+         {% url 'upload' %}
+     {% endif %}>
+      Cloud Storage
+  </a>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -8,12 +14,18 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto header__links">
-            <li class="nav-item">
-                <a class="nav-link" href="#">Products</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Pricing</a>
-            </li>
+            {% if not user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Products</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Pricing</a>
+                </li>
+            {% else  %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'upload' %}">My Files</a>
+                </li>
+            {% endif %}
             <li class="nav-item dropdown header__dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Dropdown

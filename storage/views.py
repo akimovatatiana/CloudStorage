@@ -24,7 +24,8 @@ def beautify_size(value):
 
 class UploadView(View):
     def get(self, request):
-        files_list = File.objects.all()
+        user_id = request.user.id
+        files_list = File.objects.filter(user=user_id)
 
         return render(self.request, 'storage/upload.html', {'files': files_list})
 
@@ -59,6 +60,7 @@ class UploadView(View):
 def remove_file(request):
     pk = request.POST.get('pk', '')
     file = File.objects.get(pk=pk)
+    file.file.delete()
     file.delete()
 
     return redirect('upload')

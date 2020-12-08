@@ -1,9 +1,11 @@
+from os import path
+
 from django.db import models
 from django.contrib.auth.models import User
 
 
 def get_upload_path(instance, filename):
-    return 'static/user_data/' + str(instance.user.id) + '/' + filename
+    return 'static/media/' + str(instance.user.id) + '/' + filename
 
 
 class File(models.Model):
@@ -12,3 +14,8 @@ class File(models.Model):
     file = models.FileField(upload_to=get_upload_path)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     size = models.CharField(max_length=255)
+
+    def extension(self):
+        name, extension = path.splitext(self.file.name)
+
+        return extension
