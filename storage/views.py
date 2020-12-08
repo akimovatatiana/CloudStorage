@@ -25,9 +25,13 @@ def beautify_size(value):
 class UploadView(View):
     def get(self, request):
         user_id = request.user.id
-        files_list = File.objects.filter(user=user_id)
 
-        return render(self.request, 'storage/upload.html', {'files': files_list})
+        if user_id is not None:
+            files_list = File.objects.filter(user=user_id)
+
+            return render(self.request, 'storage/upload.html', {'files': files_list})
+        else :
+            return redirect('dfs_subscribe_list')
 
     def post(self, request):
         post = request.POST.copy()
