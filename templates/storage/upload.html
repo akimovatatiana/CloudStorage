@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
+
 {% block javascript %}
     <script src="{% static 'js/jquery-file-upload/vendor/jquery.ui.widget.js' %}"></script>
     <script src="{% static 'js/jquery-file-upload/jquery.iframe-transport.js' %}"></script>
@@ -23,7 +24,7 @@
             <thead class="thead-light">
                 <tr>
                     <th scope="col">Preview</th>
-                    <th scope="col">File</th>
+                    <th scope="col">Filename</th>
                     <th scope="col">Uploaded at</th>
                     <th scope="col">Size</th>
                     <th scope="col">Action</th>
@@ -32,7 +33,15 @@
             <tbody>
             {% for file in files %}
                 <tr>
-                    <td><img width="100px" height="100px" src="../..{{ file.file.url }}" /></td>
+                    <td>
+                        {% with extensions='.jpg .png .gif .jpeg .heic' %}
+                            {% if file.extension in extensions %}
+                                <img width="100px" height="100px" src="../..{{ file.file.url }}" />
+                            {% else %}
+                                <img width="100px" height="100px" src="../../static/image/default_file_icon.gif">
+                            {% endif %}
+                        {% endwith %}
+                    </td>
                     <td><a href="{{ file.file.url }}">{{ file.title }} {{ file.file.content_type }}</a></td>
                     <td><span>{{ file.uploaded_at }}</span></td>
                     <td><span>{{ file.size }}</span></td>
