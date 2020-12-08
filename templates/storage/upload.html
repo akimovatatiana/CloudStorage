@@ -7,11 +7,16 @@
     <script src="{% static 'js/jquery-file-upload/jquery.iframe-transport.js' %}"></script>
     <script src="{% static 'js/jquery-file-upload/jquery.fileupload.js' %}"></script>
 
-    <script src="{% static 'js/file-upload/upload.js' %}"></script>
+    <script src="{% static 'js/file-upload/drag-and-drop-upload.js' %}"></script>
 {% endblock %}
 
 {% block main %}
-    <div style="margin-top: 100px">
+    <div>
+        <div class="well text-muted text-center" style="padding-top: 4rem; padding-bottom: 4rem;">
+            <span class="glyphicon glyphicon-arrow-down" style="font-size: 4rem;"></span>
+            <h3>Drop Photos Here to Upload</h3>
+        </div>
+
         <button type="button" class="btn btn-primary js-upload-files">
             <span class="glyphicon glyphicon-cloud-upload">Upload files</span>
         </button>
@@ -22,13 +27,13 @@
 
         <table id="files-list" class="table table-striped">
             <thead class="thead-light">
-                <tr>
-                    <th scope="col">Preview</th>
-                    <th scope="col">Filename</th>
-                    <th scope="col">Uploaded at</th>
-                    <th scope="col">Size</th>
-                    <th scope="col">Action</th>
-                </tr>
+            <tr>
+                <th scope="col">Preview</th>
+                <th scope="col">Filename</th>
+                <th scope="col">Uploaded at</th>
+                <th scope="col">Size</th>
+                <th scope="col">Action</th>
+            </tr>
             </thead>
             <tbody>
             {% for file in files %}
@@ -36,7 +41,7 @@
                     <td>
                         {% with extensions='.jpg .png .gif .jpeg .heic' %}
                             {% if file.extension in extensions %}
-                                <img width="100px" height="100px" src="../..{{ file.file.url }}" />
+                                <img width="100px" height="100px" src="../..{{ file.file.url }}"/>
                             {% else %}
                                 <img width="100px" height="100px" src="../../static/image/default_file_icon.gif">
                             {% endif %}
@@ -53,6 +58,9 @@
                                 <button class="btn btn-danger" type="submit">Delete</button>
                                 <input type="hidden" name="pk" value="{{ file.pk }}">
                             </form>
+                            <a href="{{ file.file.url }}" download>
+                                <button class="btn btn-primary" type="submit">Download</button>
+                            </a>
                         </div>
                     <td>
                 </tr>
