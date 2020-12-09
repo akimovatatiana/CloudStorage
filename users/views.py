@@ -5,15 +5,19 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, reverse
 from django.shortcuts import get_object_or_404
 
-from subscriptions import models
+from subscriptions.models import UserSubscription
 from subscriptions import views as sub_views
 
 
 def get_user(request, pk):
-    user_obj = User.objects.get(pk=pk)
+    user = User.objects.get(pk=pk)
+    user_subscription = UserSubscription.objects.get_queryset()
+    user_plan = user_subscription.filter(user=user)[0].subscription.plan
+    user_plan
 
     context = {
-        "user": user_obj
+        "user": user,
+        "plan": user_plan
     }
 
     return render(request, "profile/profile.html", context)
