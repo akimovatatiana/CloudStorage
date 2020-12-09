@@ -141,7 +141,7 @@ body {
     margin-top: 150px;
 }
 
-/*Sign up*/
+/* Sign up */
 .signup-card {
     margin: 20px 0;
     padding: 15px;
@@ -152,4 +152,15 @@ body {
 .signup-card .signup-card__title {
     font-size: 24px;
     text-align: center;
+}
+
+/* Storage Upload */
+
+
+.file-checkbox {
+    cursor: pointer;
+}
+
+.file-checkbox:hover {
+    cursor: pointer;
 }

@@ -3,11 +3,12 @@
 
 
 {% block javascript %}
-    <script src="{% static 'js/jquery-file-upload/vendor/jquery.ui.widget.js' %}"></script>
-    <script src="{% static 'js/jquery-file-upload/jquery.iframe-transport.js' %}"></script>
-    <script src="{% static 'js/jquery-file-upload/jquery.fileupload.js' %}"></script>
+    <script src="{% static 'js/jquery/jquery-file-upload/vendor/jquery.ui.widget.js' %}"></script>
+    <script src="{% static 'js/jquery/jquery-file-upload/jquery.iframe-transport.js' %}"></script>
+    <script src="{% static 'js/jquery/jquery-file-upload/jquery.fileupload.js' %}"></script>
 
-    <script src="{% static 'js/file-upload/drag-and-drop-upload.js' %}"></script>
+    <script src="{% static 'js/jquery/file-upload/drag-and-drop-upload.js' %}"></script>
+    <script src="{% static 'js/jquery/file-remove/multiple-remove.js' %}"></script>
 {% endblock %}
 
 {% block main %}
@@ -19,54 +20,69 @@
             <h3>Drop Files Here to Upload</h3>
         </div>
 
-        <button type="button" class="btn btn-primary js-upload-files">
-            <span class="glyphicon glyphicon-cloud-upload">Upload files</span>
-        </button>
-        <input id="fileupload" type="file" name="file" multiple
-               style="display: none;"
-               data-url="{% url 'upload' %}"
-               data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}", "user": "{{ user.id }}"}'>
+        <div class="storage-buttons">
+            <div class="file-upload" style="display: inline-block">
+                <button type="button" class="btn btn-primary js-upload-files">
+                    <span class="glyphicon glyphicon-cloud-upload">Upload files</span>
+                </button>
+                <input id="fileupload" type="file" name="file" multiple
+                       style="display: none;"
+                       data-url="{% url 'upload' %}"
+                       data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}", "user": "{{ user.id }}"}'>
+            </div>
+
+            <div class="select-all" style="display: inline">
+                <button class="btn btn-dark btn-select-all" type="submit" value="{{ file.pk }}">Select all</button>
+            </div>
+
+            <div class="delete-selected" style="display: none">
+                <button class="btn btn-danger btn-delete-selected" type="submit">Delete selected</button>
+            </div>
+        </div>
 
         <table id="files-list" class="table table-striped">
             <thead class="thead-light">
             <tr>
+                <th scope="col">Option</th>
                 <th scope="col">Preview</th>
                 <th scope="col">Filename</th>
                 <th scope="col">Uploaded at</th>
                 <th scope="col">Size</th>
-                <th scope="col">Action</th>
+                <th scope="col">Delete</th>
+                <th scope="col">Download</th>
             </tr>
             </thead>
             <tbody>
-            {% for file in files %}
-                <tr>
-                    <td>
-                        {% with extensions='.jpg .png .gif .jpeg .heic' %}
-                            {% if file.extension in extensions %}
-                                <img width="100px" height="100px" src="../..{{ file.file.url }}"/>
-                            {% else %}
-                                <img width="100px" height="100px" src="../../static/image/default_file_icon.gif">
-                            {% endif %}
-                        {% endwith %}
-                    </td>
-                    <td><a href="{{ file.file.url }}">{{ file.title }} {{ file.file.content_type }}</a></td>
-                    <td><span>{{ file.uploaded_at }}</span></td>
-                    <td><span>{{ file.size }}</span></td>
-                    <td>
-                        <div>
-                            <form action="{% url 'remove-file' %}" method="POST">
-                                {% csrf_token %}
-
-                                <button class="btn btn-danger" type="submit">Delete</button>
-                                <input type="hidden" name="pk" value="{{ file.pk }}">
-                            </form>
+                {% csrf_token %}
+                {% for file in files %}
+                    <tr class="current-file">
+                        <td>
+                            <input class='file-checkbox' type="checkbox" value="{{ file.id }}" name="file-check" id="file-check-id">
+                        </td>
+                        <td>
+                            {% with extensions='.jpg .png .gif .jpeg .heic' %}
+                                {% if file.extension in extensions %}
+                                    <img width="100px" height="100px" src="../..{{ file.file.url }}"/>
+                                {% else %}
+                                    <img width="100px" height="100px" src="{% static 'image/default_file_icon.gif' %}">
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td><a href="{{ file.file.url }}">{{ file.title }} {{ file.file.content_type }}</a></td>
+                        <td><span style>{{ file.uploaded_at }}</span></td>
+                        <td><span>{{ file.size }}</span></td>
+                        <td>
+                            <div>
+                                <button class="btn btn-danger btn-delete" type="submit" value="{{ file.pk }}" id="delete-button-id">Delete</button>
+                            </div>
+                        </td>
+                        <td>
                             <a href="{{ file.file.url }}" download>
                                 <button class="btn btn-primary" type="submit">Download</button>
                             </a>
-                        </div>
-                    <td>
-                </tr>
-            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
