@@ -12,6 +12,10 @@
 
             <h3 class="mb4">Email: {{ user.email }}</h3>
 
+            <h3 class="mb4">Subscription Plan: {{ plan.plan_name }} ({{ plan.plan_description }})</h3>
+
+            <h3 class="mb4">Grace period: {{ plan.grace_period }} month </h3>
+
         </div>
 
 {% endblock %}
