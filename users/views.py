@@ -13,7 +13,6 @@ def get_user(request, pk):
     user = User.objects.get(pk=pk)
     user_subscription = UserSubscription.objects.get_queryset()
     user_plan = user_subscription.filter(user=user)[0].subscription.plan
-    user_plan
 
     context = {
         "user": user,

@@ -11,6 +11,7 @@ from .models import File
 from subscriptions.models import UserSubscription
 from storage_subscriptions.models import StorageSubscription
 
+import json
 
 def beautify_size(value):
     if value < 512000:
@@ -106,9 +107,21 @@ class UploadView(View):
 
 
 def remove_file(request):
-    pk = request.POST.get('pk', '')
-    file = File.objects.get(pk=pk)
-    file.file.delete()
-    file.delete()
+    file_id = request.POST.get('file_id', '')
+
+    if file_id == '':
+        files_id = json.loads(request.POST.get('files_id', ''))
+
+        for pk in files_id:
+            file = File.objects.get(pk=pk)
+            # file.file.delete()
+            # file.delete()
+            print('Dummy single delete ' + str(file))
+    else:
+        file = File.objects.get(pk=file_id)
+        print('Dummy multi delete ' + str(file))
+
+        # file.file.delete()
+        # file.delete()
 
     return redirect('upload')
