@@ -18,54 +18,48 @@ $(function () {
         return $('input[type="checkbox"]:checked').length
     }
 
+    function setSelectAllStateButton() {
+        $('.delete-selected').css('display', 'none')
+        $('.btn-select-all').html("Select all")
+
+        $('.download-selected').css('display', 'none')
+    }
+
+    function setUnselectAllStateButton() {
+        $('.delete-selected').css('display', 'inline-block')
+        $('.btn-select-all').html('Unselect all')
+
+        $('.download-selected').css('display', 'inline-block')
+    }
+
     $(".select-all").click(function () {
         let checkboxes_count = $('input[type="checkbox"]').length
-        let inputs = $("input[type='checkbox']");
-
         let checked_count = getCheckedCount()
-        if (checkboxes_count !== checked_count) {
-            state = false
-            display = 'none'
-            label = 'Select all'
 
-            if (checked_count === 0) {
-                state = true
-                display = 'inline-block'
-                label = 'Unselect all'
-            }
+        if (checkboxes_count !== checked_count && checked_count === 0) {
+            check = true
 
-            for (var i = 0; i < inputs.length; i++) {
-                inputs[i].checked = state;
-            }
-
-            $('.delete-selected').css('display', display)
-            $('.btn-select-all').html(label)
+            setUnselectAllStateButton()
         } else {
-            // Unselect all
-            for (var i = 0; i < inputs.length; i++) {
-                inputs[i].checked = false;
-            }
+            check = false
 
-            $('.delete-selected').css('display', 'none')
-            $('.btn-select-all').html("Select all")
+            setSelectAllStateButton()
+        }
+
+        let inputs = $("input[type='checkbox']");
+        for (var i = 0; i < inputs.length; i++) {
+            inputs[i].checked = check;
         }
     });
 
     $(".file-checkbox").click(function () {
-        let checkboxes_count = $('input[type="checkbox"]').length
         let checked_count = getCheckedCount()
 
         if (checked_count === 1) {
-            $('.delete-selected').css('display', 'inline-block')
-            $('.btn-select-all').html('Unselect all')
+            setUnselectAllStateButton()
         } else if (checked_count === 0) {
-            $('.btn-select-all').html("Select all")
-            $('.delete-selected').css('display', 'none')
+            setSelectAllStateButton()
         }
-
-        // if (checked_count !== checkboxes_count) {
-        //     $('.btn-select-all').html('Select all')
-        // }
     });
 
     $(".delete-selected").click(function () {
@@ -93,11 +87,13 @@ $(function () {
             $.post("/storage/remove-file", function (result) {
             });
 
+            setSelectAllStateButton()
+
             for (var i = 0; i < checked_inputs.length; i++) {
                 checked_inputs[i].closest('tr').remove();
             }
         }
-    })
+    });
 
     $(".btn-delete").click(function () {
         let res = confirm("Are you sure you want to delete these product?")
@@ -115,5 +111,31 @@ $(function () {
 
             $(this).closest('tr').remove();
         }
+    });
+
+    $(".download-selected").click(function () {
+        let checked_inputs = $("input[type='checkbox']:checked");
+        var files_id_to_download = [];
+
+        for (var i = 0; i < checked_inputs.length; i++) {
+            files_id_to_download.push(checked_inputs[i].value)
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: "/storage/download-selected-files",
+            data: {files_id: JSON.stringify(files_id_to_download), csrfmiddlewaretoken: getCookie("csrftoken")},
+            headers: {"X-CSRFToken": getCookie("csrftoken")},
+            xhrFields:{
+                responseType: 'blob'
+            },
+            success: function(response, status, xhr) {
+                var link = document.createElement('a');
+
+                link.href = window.URL.createObjectURL(response);
+                link.download = xhr.getResponseHeader('Content-Disposition').split("filename=")[1];
+                link.click();
+            }
+        })
     });
 });

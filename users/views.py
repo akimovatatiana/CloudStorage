@@ -24,15 +24,15 @@ def get_user(request, pk):
 
 def get_all_users(request):
     keys = User.objects.count() + 1
-    users_obj = []
+    users = []
 
     # Traverse all users by primary keys
     for pk in range(1, keys):
-        user_obj = User.objects.get(pk=pk)
-        users_obj.append(user_obj)
+        user = User.objects.get(pk=pk)
+        users.append(user)
 
     context = {
-        "users": users_obj
+        "users": users
     }
 
     return render(request, "profile/users.html", context)

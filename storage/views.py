@@ -1,8 +1,13 @@
+from io import StringIO, BytesIO
+import zipfile
+
 from os import path
+from os.path import basename
 
 from django.conf import settings
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, Http404, FileResponse
+from django.utils.encoding import smart_str
 from django.views import View
 
 from .forms import FileForm
@@ -11,7 +16,10 @@ from .models import File
 from subscriptions.models import UserSubscription
 from storage_subscriptions.models import StorageSubscription
 
+from django.core.files import File as CoreFile
+
 import json
+
 
 def beautify_size(value):
     if value < 512000:
@@ -39,13 +47,17 @@ def get_used_size(files_list):
 
 def get_storage_capacity(request):
     user = request.user
-    user_subscription = UserSubscription.objects.get_queryset()
-    user_plan_id = user_subscription.filter(user=user)[0].subscription.plan_id
+    user_subscription = UserSubscription.objects.get_queryset().filter(user=user)
 
-    storage_subscriptions = StorageSubscription.objects.filter(subscription=user_plan_id)
-    max_size = storage_subscriptions[0].size
+    if user_subscription:
+        user_plan_id = user_subscription[0].subscription.plan_id
 
-    return max_size
+        storage_subscriptions = StorageSubscription.objects.filter(subscription=user_plan_id)
+        max_size = storage_subscriptions[0].size
+
+        return max_size
+
+    return 100
 
 
 def is_new_file_fit_in_storage(request):
@@ -125,3 +137,48 @@ def remove_file(request):
         # file.delete()
 
     return redirect('upload')
+
+
+def download_file(request):
+    user_id = request.user
+    file_id = request.POST.get('file_id', '')
+    user_file = File.objects.get(pk=file_id, user=user_id)
+
+    if user_file:
+        file_path = user_file.file.path
+
+        if path.exists(file_path):
+            with open(file_path, 'rb') as file:
+                filename = user_file.file.name
+
+                response = HttpResponse(file.read(), content_type="application/octet-stream")
+                response['Content-Disposition'] = 'attachment; filename=' + filename
+                response['X-Sendfile'] = file_path
+
+                return response
+
+        raise Http404
+
+    return redirect('upload')
+
+
+def download_compressed_files(request):
+    user = request.user
+    files_id = json.loads(request.POST.get('files_id', ''))
+
+    paths = []
+
+    for file_id in files_id:
+        file = File.objects.get(pk=file_id)
+        paths.append(path.join(settings.MEDIA_ROOT, file.file.path))
+
+    response = HttpResponse(content_type='application/zip')
+    archive = zipfile.ZipFile(response, 'w')
+    for file_path in paths:
+        archive.write(file_path, basename(file_path))
+
+    archive.close()
+
+    response['Content-Disposition'] = 'attachment; filename={}'.format('cloud-archive.zip')
+
+    return response

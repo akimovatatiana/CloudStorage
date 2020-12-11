@@ -157,9 +157,6 @@ body {
 /* Storage Upload */
 
 
-.file-checkbox {
-    cursor: pointer;
-}
 
 .file-checkbox:hover {
     cursor: pointer;
