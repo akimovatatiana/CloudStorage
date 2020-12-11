@@ -40,7 +40,7 @@
             </div>
 
             <div class="download-selected" style="display: none">
-                <button class="btn btn-primary btn-download-selected" type="submit">Download selected</button>
+                <button class="btn btn-primary btn-download-selected" type="submit">Download as zip</button>
             </div>
         </div>
 
@@ -81,9 +81,13 @@
                             </div>
                         </td>
                         <td>
-                            <a href="{{ file.file.url }}" download>
-                                <button class="btn btn-primary btn-single-download" type="submit" value="{{ file.pk }}">Download</button>
-                            </a>
+                            <div>
+                                <form action="{% url 'download-file' %}" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn btn-primary btn-single-download" type="submit" value="{{ file.pk }}">Download</button>
+                                    <input type="hidden" name="file_id" value="{{ file.pk }}">
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 {% endfor %}
