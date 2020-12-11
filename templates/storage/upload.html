@@ -38,6 +38,10 @@
             <div class="delete-selected" style="display: none">
                 <button class="btn btn-danger btn-delete-selected" type="submit">Delete selected</button>
             </div>
+
+            <div class="download-selected" style="display: none">
+                <button class="btn btn-primary btn-download-selected" type="submit">Download selected</button>
+            </div>
         </div>
 
         <table id="files-list" class="table table-striped">
@@ -62,7 +66,7 @@
                         <td>
                             {% with extensions='.jpg .png .gif .jpeg .heic' %}
                                 {% if file.extension in extensions %}
-                                    <img width="100px" height="100px" src="../..{{ file.file.url }}"/>
+                                    <img width="100px" height="100px" src="{{ file.file.url }}"/>
                                 {% else %}
                                     <img width="100px" height="100px" src="{% static 'image/default_file_icon.gif' %}">
                                 {% endif %}
@@ -78,7 +82,7 @@
                         </td>
                         <td>
                             <a href="{{ file.file.url }}" download>
-                                <button class="btn btn-primary" type="submit">Download</button>
+                                <button class="btn btn-primary btn-single-download" type="submit" value="{{ file.pk }}">Download</button>
                             </a>
                         </td>
                     </tr>

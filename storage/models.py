@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 
 def get_upload_path(instance, filename):
-    return 'static/media/' + str(instance.user.id) + '/' + filename
+    return str(instance.user.id) + '/' + filename
 
 
 class File(models.Model):
