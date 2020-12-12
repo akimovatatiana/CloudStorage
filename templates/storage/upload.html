@@ -3,94 +3,104 @@
 
 
 {% block javascript %}
+    <script src="{% static 'fontawesome-free-5.15.1-web/js/all.js' %}"></script>
+
     <script src="{% static 'js/jquery/jquery-file-upload/vendor/jquery.ui.widget.js' %}"></script>
     <script src="{% static 'js/jquery/jquery-file-upload/jquery.iframe-transport.js' %}"></script>
     <script src="{% static 'js/jquery/jquery-file-upload/jquery.fileupload.js' %}"></script>
 
     <script src="{% static 'js/jquery/file-upload/drag-and-drop-upload.js' %}"></script>
-    <script src="{% static 'js/jquery/file-remove/multiple-remove.js' %}"></script>
+    <script src="{% static 'js/jquery/file-select-actions/file-select-actions.js' %}"></script>
 {% endblock %}
 
 {% block main %}
     <div>
-        <div style="display: inline-block"><span class="text-muted">Cloud Storage usage: {{ used_size }} / {{ capacity }} mb</span></div>
-
-        <div class="well text-muted text-center" style="padding-top: 4rem; padding-bottom: 4rem;">
+        <div class="drag-and-drop well text-muted text-center">
             <span class="glyphicon glyphicon-arrow-down" style="font-size: 4rem;"></span>
-            <h3>Drop Files Here to Upload</h3>
-        </div>
+            <h3 class="js-upload-files-text">Drop files anywhere to upload</h3>
 
-        <div class="storage-buttons">
             <div class="file-upload" style="display: inline-block">
-                <button type="button" class="btn btn-primary js-upload-files">
-                    <span class="glyphicon glyphicon-cloud-upload">Upload files</span>
-                </button>
+                <span>Or upload by</span>
+                <a href='' class="js-upload-files js-upload-files-link">
+                    <span class="glyphicon glyphicon-cloud-upload">link</span>
+                </a>
                 <input id="fileupload" type="file" name="file" multiple
                        style="display: none;"
                        data-url="{% url 'upload' %}"
                        data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}", "user": "{{ user.id }}"}'>
             </div>
+        </div>
 
-            <div class="select-all" style="display: inline">
-                <button class="btn btn-dark btn-select-all" type="submit" value="{{ file.pk }}">Select all</button>
-            </div>
+        <div class="before-table-content">
+            <h2 class="overview-text">Overview</h2>
+            <div class="storage-size-info"><span
+                    class="storage-size-info-text text-muted">{{ used_size }} of {{ capacity }} GB used</span></div>
+            <div class="storage-buttons">
+                <div class="delete-selected" style="display: none">
+                    <button class="btn btn-outline-danger btn-delete-selected" type="submit">Delete</button>
+                </div>
 
-            <div class="delete-selected" style="display: none">
-                <button class="btn btn-danger btn-delete-selected" type="submit">Delete selected</button>
-            </div>
-
-            <div class="download-selected" style="display: none">
-                <button class="btn btn-primary btn-download-selected" type="submit">Download as zip</button>
+                <div class="download-selected" style="display: none">
+                    <button class="btn btn-outline-primary btn-download-selected" type="submit">Download as zip</button>
+                </div>
             </div>
         </div>
 
         <table id="files-list" class="table table-striped">
             <thead class="thead-light">
             <tr>
-                <th scope="col">Option</th>
+                <th scope="col">
+                    <input class="select-all" type="checkbox" />
+                </th>
                 <th scope="col">Preview</th>
                 <th scope="col">Filename</th>
                 <th scope="col">Uploaded at</th>
                 <th scope="col">Size</th>
-                <th scope="col">Delete</th>
-                <th scope="col">Download</th>
+                <th scope="col">Actions</th>
             </tr>
             </thead>
             <tbody>
-                {% csrf_token %}
-                {% for file in files %}
-                    <tr class="current-file">
-                        <td>
-                            <input class='file-checkbox' type="checkbox" value="{{ file.id }}" name="file-check" id="file-check-id">
-                        </td>
-                        <td>
-                            {% with extensions='.jpg .png .gif .jpeg .heic' %}
-                                {% if file.extension in extensions %}
-                                    <img width="100px" height="100px" src="{{ file.file.url }}"/>
+            {% csrf_token %}
+            {% for file in files %}
+                <tr class="current-file">
+                    <td>
+                        <input type="checkbox" class='file-checkbox' value="{{ file.id }}" name="file-check" id="file-check-id">
+                    </td>
+                    <td>
+                        <div class="image-wrapper" data-filepath="{{ file.file.url }}">
+                            {% with image_extensions='.jpg .png .gif .jpeg .heic' doc_extensions='.docx .doc' xls_extensions='.xlsx .xls' ppt_extensions='.pptx .ppt'%}
+                                {% if file.extension in image_extensions %}
+                                    <img class="image-preview" src="{{ file.file.url }}"/>
+                                {% elif file.extension in doc_extensions %}
+                                    <img class="image-preview" src={% static '/image/doc.png' %}/>
+                                {% elif file.extension in xls_extensions %}
+                                    <img class="image-preview" src={% static '/image/xls.png' %}/>
+                                {% elif file.extension in ppt_extensions %}
+                                    <img class="image-preview" src={% static '/image/ppt.png' %}
                                 {% else %}
-                                    <img width="100px" height="100px" src="{% static 'image/default_file_icon.gif' %}">
+                                    <i class="fa fa-cloud-download fa-lg"></i>
                                 {% endif %}
                             {% endwith %}
-                        </td>
-                        <td><a href="{{ file.file.url }}">{{ file.title }} {{ file.file.content_type }}</a></td>
-                        <td><span style>{{ file.uploaded_at }}</span></td>
-                        <td><span>{{ file.size }}</span></td>
-                        <td>
-                            <div>
-                                <button class="btn btn-danger btn-delete" type="submit" value="{{ file.pk }}" id="delete-button-id">Delete</button>
+                        </div>
+                    </td>
+                    <td><a href="{{ file.file.url }}"><span class="filename">{{ file.title }} {{ file.file.content_type }}</span></a></td>
+                    <td><span style>{{ file.uploaded_at }}</span></td>
+                    <td><span>{{ file.size }}</span></td>
+                    <td>
+                        <div>
+                            <div class="i-delete" type="submit" data-file-id="{{ file.id }}">
+                                <i class="fa fa-trash fa-lg text-danger"></i>
                             </div>
-                        </td>
-                        <td>
-                            <div>
-                                <form action="{% url 'download-file' %}" method="post">
-                                    {% csrf_token %}
-                                    <button class="btn btn-primary btn-single-download" type="submit" value="{{ file.pk }}">Download</button>
-                                    <input type="hidden" name="file_id" value="{{ file.pk }}">
-                                </form>
+
+                            <div class="i-download">
+                                <a href="{{ file.file.url }}" download>
+                                    <i class="fa fa-cloud-download-alt fa-lg"></i>
+                                </a>
                             </div>
-                        </td>
-                    </tr>
-                {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
             </tbody>
         </table>
     </div>

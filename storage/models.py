@@ -2,10 +2,11 @@ from os import path
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.encoding import uri_to_iri
 
 
 def get_upload_path(instance, filename):
-    return str(instance.user.id) + '/' + filename
+    return uri_to_iri(str(instance.user.id) + '/' + filename)
 
 
 class File(models.Model):
