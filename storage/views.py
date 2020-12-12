@@ -1,5 +1,5 @@
-from io import StringIO, BytesIO
 import zipfile
+import json
 
 from os import path
 from os.path import basename
@@ -7,8 +7,8 @@ from os.path import basename
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse, Http404, FileResponse
-from django.utils.encoding import smart_str
 from django.views import View
+from django.utils.encoding import uri_to_iri
 
 from .forms import FileForm
 from .models import File
@@ -16,28 +16,25 @@ from .models import File
 from subscriptions.models import UserSubscription
 from storage_subscriptions.models import StorageSubscription
 
-from django.core.files import File as CoreFile
-
-import json
-
 
 def beautify_size(value):
     if value < 512000:
         value = value / 1024.0
-        ext = 'kb'
+        ext = 'KB'
     elif value < 4194304000:
         value = value / 1048576.0
-        ext = 'mb'
+        ext = 'MB'
     else:
         value = value / 1073741824.0
-        ext = 'gb'
+        ext = 'GB'
     return '%s %s' % (str(round(value, 2)), ext)
 
 
 def get_used_size(files_list):
     used_size = 0
     for file in files_list:
-        file_path = str(settings.BASE_DIR) + file.file.url
+        file_path = str(settings.BASE_DIR) + uri_to_iri(file.file.url)
+
         size = path.getsize(file_path)
 
         used_size += size
@@ -100,18 +97,18 @@ class UploadView(View):
             form_with_unique_filename = form.save()
 
             # Get unique filename from disk, add to form
-            filename = path.split(str(form_with_unique_filename.file.url))[-1]
+            filename = path.split(uri_to_iri(str(form_with_unique_filename.file.url)))[-1]
             form_with_unique_filename.title = filename
 
             # Add file size to form
-            file_path = str(settings.BASE_DIR) + form_with_unique_filename.file.url
+            file_path = str(settings.BASE_DIR) + uri_to_iri(form_with_unique_filename.file.url)
             file_size = beautify_size(path.getsize(file_path))
             form_with_unique_filename.size = file_size
 
             form_with_unique_filename.save()
 
             data = {'is_valid': True, 'name': form_with_unique_filename.file.name,
-                    'url': form_with_unique_filename.file.url}
+                    'url': uri_to_iri(form_with_unique_filename.file.url)}
         else:
             data = {'is_valid': False}
 
@@ -128,10 +125,10 @@ def remove_file(request):
             file = File.objects.get(pk=pk)
             # file.file.delete()
             # file.delete()
-            print('Dummy single delete ' + str(file))
+            print('Dummy multi delete ' + str(file))
     else:
         file = File.objects.get(pk=file_id)
-        print('Dummy multi delete ' + str(file))
+        print('Dummy single delete ' + str(file))
 
         # file.file.delete()
         # file.delete()
@@ -145,7 +142,7 @@ def download_file(request):
     user_file = File.objects.get(pk=file_id, user=user_id)
 
     if user_file:
-        file_path = user_file.file.path
+        file_path = uri_to_iri(user_file.file.path)
 
         if path.exists(file_path):
             with open(file_path, 'rb') as file:
@@ -170,7 +167,7 @@ def download_compressed_files(request):
 
     for file_id in files_id:
         file = File.objects.get(pk=file_id)
-        paths.append(path.join(settings.MEDIA_ROOT, file.file.path))
+        paths.append(path.join(settings.MEDIA_ROOT, uri_to_iri(file.file.path)))
 
     response = HttpResponse(content_type='application/zip')
     archive = zipfile.ZipFile(response, 'w')
