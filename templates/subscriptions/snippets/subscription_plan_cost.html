@@ -1,0 +1,10 @@
+{% load i18n %}
+
+<h2>Subscription Details</h2>
+
+<div class="form-errors">{{ form.non_field_errors }}</div>
+
+<div>
+  {{ form.plan_cost.errors }}
+  {{ form.plan_cost }}
+</div>
