@@ -1,3 +1,4 @@
+from datetime import datetime
 from os import path
 
 from django.db import models
@@ -13,7 +14,7 @@ class File(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     file = models.FileField(upload_to=get_upload_path)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_at = models.DateTimeField(default=datetime.now)
     size = models.CharField(max_length=255)
 
     def extension(self):
