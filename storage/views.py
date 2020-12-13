@@ -42,9 +42,12 @@ def get_used_size(files_list):
     return used_size
 
 
+def get_user_subscription(user):
+    return UserSubscription.objects.get_queryset().filter(user=user)
+
+
 def get_storage_capacity(request):
-    user = request.user
-    user_subscription = UserSubscription.objects.get_queryset().filter(user=user)
+    user_subscription = get_user_subscription(request.user)
 
     if user_subscription:
         user_plan_id = user_subscription[0].subscription.plan_id
@@ -54,7 +57,7 @@ def get_storage_capacity(request):
 
         return max_size
 
-    return 100
+    return 0
 
 
 def is_new_file_fit_in_storage(request):
@@ -75,9 +78,14 @@ class UploadView(View):
         user_id = request.user.id
 
         if user_id is not None:
-            files_list = File.objects.filter(user=user_id)
+            user_subscription = get_user_subscription(user_id)
+
+            if not user_subscription:
+                return redirect('dfs_subscribe_list')
+
+            files_list = File.objects.filter(user=user_id).order_by('-uploaded_at')
             used_size = beautify_size(get_used_size(files_list))
-            capacity = get_storage_capacity(request)
+            capacity = int(get_storage_capacity(request) / 1000)
 
             return render(self.request, 'storage/upload.html',
                           {'files': files_list,
@@ -123,15 +131,15 @@ def remove_file(request):
 
         for pk in files_id:
             file = File.objects.get(pk=pk)
-            # file.file.delete()
-            # file.delete()
-            print('Dummy multi delete ' + str(file))
+            file.file.delete()
+            file.delete()
+            # print('Dummy multi delete ' + str(file))
     else:
         file = File.objects.get(pk=file_id)
-        print('Dummy single delete ' + str(file))
+        # print('Dummy single delete ' + str(file))
 
-        # file.file.delete()
-        # file.delete()
+        file.file.delete()
+        file.delete()
 
     return redirect('upload')
 
