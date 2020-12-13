@@ -78,7 +78,7 @@
                                 {% elif file.extension in ppt_extensions %}
                                     <img class="image-preview" src={% static '/image/ppt.png' %}
                                 {% else %}
-                                    <i class="fa fa-cloud-download fa-lg"></i>
+                                    <img class="image-preview" src={% static '/image/default-file-icon.gif' %}
                                 {% endif %}
                             {% endwith %}
                         </div>
@@ -89,12 +89,12 @@
                     <td>
                         <div>
                             <div class="i-delete" type="submit" data-file-id="{{ file.id }}">
-                                <i class="fa fa-trash fa-lg text-danger"></i>
+                                <i class="fa fa-trash-alt action-icon text-danger"></i>
                             </div>
 
                             <div class="i-download">
                                 <a href="{{ file.file.url }}" download>
-                                    <i class="fa fa-cloud-download-alt fa-lg"></i>
+                                    <i class="fa fa-download action-icon text-primary"></i>
                                 </a>
                             </div>
                         </div>
