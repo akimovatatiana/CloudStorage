@@ -30,7 +30,7 @@
                                   "{% url 'signup-basic' %}"
                                 {% endif %}>
                     {% elif detail.plan.plan_name == "Standard" %}
-                        <div class="plan__description h6">150.00$</div>
+                        <div class="plan__description h6">0.99$</div>
                         <form method="post" action=
                                 {% if user.is_authenticated %}
                                   "{% url 'dfs_subscribe_add' %}"
@@ -38,7 +38,7 @@
                                   "{% url 'signup-standard' %}"
                                 {% endif %}>
                     {% else %}
-                        <div class="plan__description h6">200.00$</div>
+                        <div class="plan__description h6">8.99$</div>
                         <form method="post"
                               action={% if user.is_authenticated %}
                                   "{% url 'dfs_subscribe_add' %}"
