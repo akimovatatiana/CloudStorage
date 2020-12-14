@@ -1,0 +1,7 @@
+{% load i18n %}
+
+{% if form %}
+  <span class="h1">Payment details</span>
+
+  {% include 'subscriptions/snippets/form_table.html' with form=form %}
+{% endif %}

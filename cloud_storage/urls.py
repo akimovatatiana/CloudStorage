@@ -15,14 +15,15 @@ Including another URLconf
 """
 import importlib
 
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('subscriptions/', include('subscriptions.urls')),
-    # path('standard-subscription-payment', payment, name='standard-payment'),
-    # path('premium-subscription-payment', payment, name='premium-payment'),
-    path('users/', include('users.urls')),
+from cloud_storage import settings
 
-]
+urlpatterns = [
+                  path('admin/', admin.site.urls),
+                  path('subscriptions/', include('subscriptions.urls')),
+                  path('users/', include('users.urls')),
+                  path('storage/', include('storage.urls'))
+              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

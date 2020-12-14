@@ -6,67 +6,62 @@
 {% block title %}Subscribe - CloudStorage{% endblock %}
 
 {% block content %}
-  <main class="subscribe-container">
-    <h1>{{ plan_list.title|safe }}</h1>
-{#    <span class="subtitle">{{ plan_list.subtitle|safe }}</span>#}
-{##}
-{#    <div class="header">{{ plan_list.header|safe }}</div>#}
+    <main class="subscribe-container">
+        {% if user.is_authenticated %}
+            <h1 class="h1 display-4">Subscription Plans</h1>
+        {% else %}
+            <h1 class="h1 display-4">Sign Up & Subscribe</h1>
+        {% endif %}
 
-    <div class="plans">
-      {% for detail in details %}
-        <div class="plan">
-          {{ detail.plan }}
-          {{ detail.html_content|safe }}
-          <div class="plan__description">
-            {{ detail.plan.plan_description }}
-          </div>
-            {% if detail.plan.plan_name == "Basic" %}
-                <form method="post" action="{% url 'signup-basic' %}">
+        <div class="plans">
+            {% for detail in details %}
+                <div class="plan">
+                    <span class="h2">{{ detail.plan }}</span>
+                    {{ detail.html_content|safe }}
+                    <div class="plan__description">
+                        {{ detail.plan.plan_description }}
+                    </div>
+                    {% if detail.plan.plan_name == "Basic" %}
+                        <div class="plan__description h6">Free</div>
+                        <form method="post" action=
+                                {% if user.is_authenticated %}
+                                  "{% url 'dfs_subscribe_add' %}"
+                                {% else %}
+                                  "{% url 'signup-basic' %}"
+                                {% endif %}>
+                    {% elif detail.plan.plan_name == "Standard" %}
+                        <div class="plan__description h6">0.99$</div>
+                        <form method="post" action=
+                                {% if user.is_authenticated %}
+                                  "{% url 'dfs_subscribe_add' %}"
+                                {% else %}
+                                  "{% url 'signup-standard' %}"
+                                {% endif %}>
+                    {% else %}
+                        <div class="plan__description h6">8.99$</div>
+                        <form method="post"
+                              action={% if user.is_authenticated %}
+                                  "{% url 'dfs_subscribe_add' %}"
+                              {% else %}
+                                  "{% url 'signup-premium' %}"
+                              {% endif %}>
+                    {% endif %}
                     {% csrf_token %}
                     <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
                     <input type="hidden" name="plan_name" value="{{ detail.plan.plan_name }}">
                     <input type="hidden" name="redirect_from" value="subscribe_list">
-
-                    <button type="submit" class="button-positive plan__button">{{ detail.subscribe_button_text|safe }}</button>
-                </form>
-            {% endif %}
-            {% if detail.plan.plan_name == "Standard" %}
-                <form method="post" action="{% url 'signup-standard' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
-                    <input type="hidden" name="plan_name" value="{{ detail.plan.plan_name }}">
-                    <input type="hidden" name="redirect_from" value="subscribe_list">
-                    <button type="submit" class="button-positive plan__button">{{ detail.subscribe_button_text|safe }}</button>
-                </form>
-            {% endif %}
-            {% if detail.plan.plan_name == "Premium" %}
-                <form method="post" action="{% url 'signup-premium' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
-                    <input type="hidden" name="plan_name" value="{{ detail.plan.plan_name }}">
-                    <input type="hidden" name="redirect_from" value="subscribe_list">
-                    <button type="submit" class="button-positive plan__button">{{ detail.subscribe_button_text|safe }}</button>
-                </form>
-            {% endif %}
+                    <button type="submit"
+                            class="btn btn-outline-success card-signup-button">
+                        {% if user.is_authenticated %}
+                            Subscribe
+                        {% else %}
+                            {{ detail.subscribe_button_text|safe }}
+                        {% endif %}
+                    </button>
+                    </form>
+                </div>
+            {% endfor %}
         </div>
-      {% endfor %}
-    </div>
-
-  <!--<div class="plans">
-      {% for detail in details %}
-        <div class="plan">
-          {{ detail.plan }}
-          {{ detail.html_content|safe }}
-
-          <form method="post" action="{% url 'dfs_subscribe_add' %}">
-            {% csrf_token %}
-            <input type="hidden" name="plan_id" value="{{ detail.plan.id }}">
-            <button type="submit" class="button-positive">{{ detail.subscribe_button_text|safe }}</button>
-          </form>
-        </div>
-      {% endfor %}
-    </div> -->
-
-{#    <div class="footer">{{ plan_list.footer|safe }}</div>#}
-  </main>
+        {#            <div class="footer">{{ plan_list.footer|safe }}</div>#}
+    </main>
 {% endblock %}

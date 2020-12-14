@@ -8,16 +8,12 @@
 {% block main %}
     <form method="post">
         {% csrf_token %}
-        <div class="signup-card">
+        <div class="signup-card col-5">
             <h2 class="signup-card__title">Sign up</h2>
-{#            <form method="post" action="{% url 'dfs_subscribe_add' %}">#}
-{#                {% csrf_token %}#}
             {{ form|crispy }}
-            <input type="hidden" name="plan_id" value="439f2a75-5d03-4e8b-89a2-c7e705d185f6">
+            <input type="hidden" name="plan_id" value={{ plan_id }}>
             <input type="hidden" name="redirect_from" value="signup">
-            <button type="submit" class="button-positive">{{ "Sign Up"|safe }}</button>
-                {#      <button type="submit" class="btn btn-primary btn-block">Sign Up</button>#}
-{#            </form>#}
+            <button type="submit" class="btn btn-success signup-button">{{ "Sign Up"|safe }}</button>
         </div>
     </form>
 

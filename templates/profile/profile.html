@@ -1,17 +1,45 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block main %}
 
-        <div class="mw6 center pa3 sans-serif">
-
-            <h1 class="mb4">User: {{ user.username }}</h1>
-
-            <h3 class="mb4">First Name: {{ user.first_name }}</h3>
-
-            <h3 class="mb4">Last Name: {{ user.last_name }}</h3>
-
-            <h3 class="mb4">Email: {{ user.email }}</h3>
-
+    <div class="mw6 center pa3 sans-serif profile-wrapper">
+        <div class="profile-image-column">
+            <h3 class="mb-4">Profile</h3>
+            <img class="profile-image" src="{% static 'image/default-user.png' %}"/>
         </div>
+        <div class="profile-info-column">
+            <div class="profile-info-column-item">
+                <span class="mb4 profile-info h5">Username</span>
+                <input class="profile-info-input form-control" type="text" value="{{ user.username }}">
+            </div>
+            <div class="profile-info-column-item">
+                <span class="mb4 profile-info h5">First Name</span>
+                <input class="profile-info-input form-control" type="text" value="{{ user.first_name }}">
+            </div>
+            <div class="profile-info-column-item">
+                <span class="mb4 profile-info h5">Last Name</span>
+                <input class="profile-info-input form-control" type="text" value="{{ user.last_name }}">
+            </div>
+            <div class="profile-info-column-item">
+                <span class="mb4 h5">Email</span>
+                <input class="profile-info-input form-control" type="email" value="{{ user.email }}">
+            </div>
+            <div class="profile-info-column-item">
+                {% if plan is None %}
+                    <a href="{% url 'dfs_subscribe_list' %}"><button class="btn btn-outline-success">Subscribe</button></a>
+                {% else %}
+                    <span style="display: block" class="mb4 profile-info h5"><a href="">{{ plan.plan_name }} subscription</a></span>
+                    <button class="btn btn-outline-success">Change plan</button>
+                {% endif %}
+            </div>
+            <div class="profile-info-column-item">
+                <button class="btn btn-primary btn-save-changes">Save changes</button>
+            </div>
+{#            <div class="profile-right-column-item">#}
+{#                <span class="mb4 h5">Grace period: </span> {{ plan.grace_period }} month#}
+{#            </div>#}
+        </div>
+    </div>
 
 {% endblock %}
