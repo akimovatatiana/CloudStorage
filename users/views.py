@@ -71,4 +71,26 @@ def signup(request):
     else:
         form = UserSignUpForm()
 
-    return render(request, f'registration/signup.html', {'form': form, 'plan_id': plan_id})
+    return render(request, 'registration/signup.html', {'form': form, 'plan_id': plan_id})
+
+
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        form = UserUpdateForm(request.POST)
+
+        if form.is_valid():
+            form = UserUpdateForm(request.POST, instance=request.user)
+            form.save()
+
+            return redirect('profile')
+
+        # else:
+        #     form = UserUpdateForm(instance=request.user)
+
+            # return render(valid_request, 'profile/profile.html', {'form': form})
+
+    else:
+        form = UserUpdateForm(instance=request.user)
+
+    return render(request, 'profile/profile.html', {'form': form})
