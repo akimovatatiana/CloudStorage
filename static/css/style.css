@@ -1,6 +1,15 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
 html,
 body {
-    height: 100%;
+    /*height: 100%;*/
+}
+
+body {
+    background: #f5f5f5;
 }
 
 .header {
@@ -8,11 +17,11 @@ body {
     padding-right: 150px;
     height: 80px;
     background-color: #ffffff;
-    box-shadow: 0 1px 0 0 rgba(194,194,194,0.24)
+    box-shadow: 0 1px 0 0 rgba(194, 194, 194, 0.24)
 }
 
 .header .header__title {
-    margin-right: 30px; 
+    margin-right: 30px;
     padding-top: 0;
     padding-right: 30px;
     background-image: url(../../static/image/cloud.png);
@@ -66,10 +75,8 @@ body {
 }
 
 
-@media screen and (max-width: 1070px)
-{
-    .header
-    {
+@media screen and (max-width: 1070px) {
+    .header {
         padding-left: 100px;
         padding-right: 100px;
     }
@@ -78,15 +85,14 @@ body {
 
 /* Plan cards styles */
 
-#dfs-container
-{
+#dfs-container {
     font: inherit;
     padding-top: 60px;
     background-color: #f5f5f5;
 }
 
 .subscribe-container {
-    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
@@ -95,17 +101,15 @@ body {
 }
 
 .subscribe-form {
-    margin: 100px auto;
+
 }
 
-#dfs-container .subscribe-container .plans
-{
+#dfs-container .subscribe-container .plans {
     margin-top: 30px;
     padding-top: 0;
 }
 
-#dfs-container .subscribe-container .plan
-{
+#dfs-container .subscribe-container .plan {
     min-width: 320px;
     min-height: 540px;
     margin-left: 15px;
@@ -146,10 +150,8 @@ body {
     width: 225px;
 }
 
-@media screen and (max-width: 1025px)
-{
-    #dfs-container .subscribe-container .plans
-    {
+@media screen and (max-width: 1025px) {
+    #dfs-container .subscribe-container .plans {
         align-items: center;
     }
 }
@@ -242,7 +244,9 @@ body {
 }
 
 .btn-download-selected:after {
-    font-family: "Font Awesome 5 Free"; font-weight: 900; content: "\f1c6";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    content: "\f1c6";
     margin-left: 5%;
 }
 
@@ -286,9 +290,9 @@ body {
 }
 
 .profile-image {
-    width: 320px;
-    height: 320px;
-    margin: -10% 0 0 3%;
+    max-width: 320px;
+    max-height: 320px;
+    width: 100%;
 }
 
 .profile-info-column {
@@ -315,74 +319,217 @@ body {
     width: 155px;
 }
 
-/*.btn-save-changes:after {*/
-/*    font-family: "Font Awesome 5 Free"; font-weight: 900; content: "\f058";*/
-/*    margin-left: 9%;*/
-/*}*/
+.profile-button {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: row;
+}
 
+.profile-button__save {
+    margin-right: 30px;
+}
+
+.profile-form-field__link {
+    font-size: 14px;
+}
+
+.profile-title {
+    font-size: 34px;
+    margin-bottom: 10px;
+}
+
+.profile-form {
+    margin-top: 60px;
+}
+
+.password-field {
+    margin-bottom: 1rem;
+}
+
+.password-form {
+    margin-top: 15px;
+}
+
+.profile-form__image,
+.profile-form__info {
+    margin: 0 30px;
+}
+
+.profile-form__image {
+    margin-bottom: 30px;
+}
+
+@media (max-width: 640px) {
+    .profile-form__image,
+    .profile-form__info {
+        margin: 0 auto;
+    }
+}
+
+.profile-block {
+    margin: 0 auto;
+    margin-top: 50px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.profile-subscription {
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+}
+
+.password-block {
+    margin: 0 auto;
+    margin-top: 50px;
+}
+
+.password-header {
+    margin-bottom: 20px;
+}
+
+.password-block ul {
+    margin-left: 18px;
+}
 
 /* Subscribe preview */
 
-    #dfs-container .subscribe-container .subscribe-form {
-      padding: 1rem 0;
-    }
+#dfs-container .subscribe-container .subscribe-form {
+    padding: 1rem 0;
+}
 
-    #dfs-container .subscribe-container .form-field {
-      margin: 0.5rem 0;
-      max-width: 600px;
-    }
+#dfs-container .subscribe-container .form-field {
+    margin: 0.5rem 0;
+    max-width: 600px;
+}
 
-      #dfs-container .subscribe-container .form-field input,
-      #dfs-container .subscribe-container .form-field select {
-        display: block;
-        font-size: 1.5rem;
-      }
+#dfs-container .subscribe-container .form-field input,
+#dfs-container .subscribe-container .form-field select {
+    display: block;
+    font-size: 1.5rem;
+}
 
-      #dfs-container .subscribe-container .form-field input {display: block;
-        width: 100%;
-        height: calc(1.5em + .75rem + 2px);
-        padding: .375rem .75rem;
-        font-size: 1rem;
-        font-weight: 400;
-        line-height: 1.5;
-        color: #495057;
-        background-color: #fff;
-        background-clip: padding-box;
-        border: 1px solid #ced4da;
-        border-radius: .25rem;
-        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-      }
+#dfs-container .subscribe-container .form-field input {
+    display: block;
+    width: 100%;
+    height: calc(1.5em + .75rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
 
-      #dfs-container .subscribe-container .form-field-label {
-        display: block;
-        font-size: 1rem;
-        font-weight: 700;
-        padding: 0.25rem 0;
-      }
+#dfs-container .subscribe-container .form-field-label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.25rem 0;
+}
 
-      #dfs-container .subscribe-container .form-field-help-text {
-        display: block;
-        font-size: 1rem;
-        font-style: italic;
-        padding: 0.5rem 0;
-      }
+#dfs-container .subscribe-container .form-field-help-text {
+    display: block;
+    font-size: 1rem;
+    font-style: italic;
+    padding: 0.5rem 0;
+}
 
-    #dfs-container .subscribe-container #id_plan_cost {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
+#dfs-container .subscribe-container #id_plan_cost {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
 
-      #dfs-container .subscribe-container #id_plan_cost li {
-        margin: 0.5rem 0;
-      }
+#dfs-container .subscribe-container #id_plan_cost li {
+    margin: 0.5rem 0;
+}
 
-      #dfs-container .subscribe-container #id_plan_cost label {
-        cursor: pointer;
-      }
+#dfs-container .subscribe-container #id_plan_cost label {
+    cursor: pointer;
+}
 
-    #dfs-container .subscribe-container .form-buttons {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-    }
+#dfs-container .subscribe-container .form-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#dfs-container .subscribe-container .form-field input:focus {
+    color: #495057;
+    background-color: #fff;
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+}
+
+#dfs-container .subscribe-container .h1 {
+    font-size: 28px;
+    font-weight: 400;
+}
+
+#dfs-container .subscribe-container .form-field-label {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+#dfs-container .subscribe-container .form-field label {
+    display: block;
+}
+
+#dfs-container .subscribe-container .form-field input, #dfs-container .subscribe-container .form-field select {
+    display: block;
+    height: calc(1.5em + .75rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+#dfs-container .subscribe-container .form-field {
+    margin: 0 0;
+    max-width: 100%;
+}
+
+#dfs-container .subscribe-container {
+    /*max-width: fit-content;*/
+}
+
+.confirmation-text {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+#dfs-container .subscribe-container h2 {
+    color: #000000;
+}
+
+.confirmed-link {
+    text-align: center;
+}
+
+#dfs-container main a {
+    color: #007bff;
+    text-decoration: none;
+    background-color: transparent;
+    font-weight: 500;
+    font-size: 22px;
+}
+
+#dfs-container main a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}

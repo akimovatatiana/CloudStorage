@@ -1,20 +1,21 @@
 {% extends 'subscriptions/base.html' %}
 
 {% load i18n %}
+
 {% load currency_filters %}
 
 {% block title %}Subscribe | Confirmation{% endblock %}
 
 {% block content %}
   <main class="subscribe-container">
-    <h1>Confirmation</h1>
+    <h1 class="display-4">Confirmation</h1>
 
-    <p>
+    <p class="confirmation-text">
       Below are the details of your subscription for you to review and confirm.
       Your credit card has not been charged yet.
     </p>
 
-    <h2>Subscription Details</h2>
+    <h2 class="display-3 confirmation-subtitle">Subscription Details</h2>
 
     <ul class="confirmation-details">
       <li>
@@ -30,7 +31,7 @@
       </li>
     </ul>
 
-    <h2>Payment Details</h2>
+    <h2 class="display-3">Payment Details</h2>
 
     <ul class="confirmation-details">
       <li>
@@ -71,7 +72,7 @@
         {{ plan_cost_form.as_p }}
         {{ payment_form.as_p }}
 
-        <button type="submit" class="button-negative">Go back</button>
+        <button type="submit" class="btn btn-outline-danger">Go back</button>
       </form>
 
       <form class="subscribe-form" action="{% url 'dfs_subscribe_add' %}" method="POST">
@@ -81,7 +82,7 @@
         {{ plan_cost_form.as_p }}
         {{ payment_form.as_p }}
 
-        <button type="submit" class="button-positive">Confirm Subscription</button>
+        <button type="submit" class="btn btn-primary">Confirm Subscription</button>
       </form>
 
     </div>
