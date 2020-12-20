@@ -18,6 +18,9 @@ class UserUpdateForm(UserChangeForm):
     # first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     # last_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     # email = forms.EmailField(max_length=254)
+    def __init__(self, *args, **kwargs):
+        super(UserChangeForm, self).__init__(*args, **kwargs)
+        del self.fields['password']
 
     class Meta:
         model = User

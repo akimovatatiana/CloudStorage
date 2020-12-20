@@ -7,19 +7,21 @@
 {% block title %}Subscribe{% endblock %}
 
 {% block content %}
-    <main class="subscribe-container col-6">
+    <main class="subscribe-container col-4">
         <h1 class="display-4">Subscribe</h1>
-        <span class="subtitle">{{ plan.plan_name }}</span>
+        <span class="subtitle mb-4">{{ plan.plan_name }}</span>
 
         <form class="subscribe-form" action="{% url 'dfs_subscribe_add' %}" method="POST">
             <div class="form-group">
                 {% csrf_token %}
+
                 <input type="hidden" name="action" value="confirm">
                 <input type="hidden" name="plan_id" value="{{ plan.id }}">
 
                 {% include 'subscriptions/snippets/subscription_plan_cost.html' with form=plan_cost_form %}
+                <div class="mt-3 mb-4">
                 {% include 'subscriptions/snippets/payment_details.html' with form=payment_form %}
-
+</div>
                 <button type="submit" class="btn btn-success">Confirm order</button>
             </div>
         </form>

@@ -6,6 +6,8 @@ from .forms import *
 
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 from django.shortcuts import render, redirect, reverse
 from django.shortcuts import get_object_or_404
 
@@ -77,20 +79,43 @@ def signup(request):
 @login_required
 def profile(request):
     if request.method == 'POST':
-        form = UserUpdateForm(request.POST)
+        form = PasswordChangeFrom(request.POST, instance=request.user)
 
         if form.is_valid():
-            form = UserUpdateForm(request.POST, instance=request.user)
+           # form = UserUpdateForm(request.POST, instance=request.user)
             form.save()
 
             return redirect('profile')
 
-        # else:
-        #     form = UserUpdateForm(instance=request.user)
-
+        #else:
+            #form = UserUpdateForm(instance=request.user)
+           # return redirect('profile')
             # return render(valid_request, 'profile/profile.html', {'form': form})
 
     else:
         form = UserUpdateForm(instance=request.user)
 
     return render(request, 'profile/profile.html', {'form': form})
+
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(data=request.POST, user=request.user)
+
+        if form.is_valid():
+            # form = UserUpdateForm(request.POST, instance=request.user)
+            form.save()
+            update_session_auth_hash(request, form.user)
+            return redirect('profile')
+        else:
+            return redirect('change-password')
+        # else:
+        # form = UserUpdateForm(instance=request.user)
+        # return redirect('profile')
+        # return render(valid_request, 'profile/profile.html', {'form': form})
+
+    else:
+        form = PasswordChangeForm(user=request.user)
+
+    return render(request, 'profile/change-password.html', {'form': form})

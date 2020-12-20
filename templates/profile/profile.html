@@ -4,47 +4,35 @@
 
 
 {% block main %}
-    <form method="post">
-        {% csrf_token %}
-        {{ form|crispy }}
-{#        <div class="mw6 center pa3 sans-serif profile-wrapper">#}
-{#            <div class="profile-image-column">#}
-{#                <h3 class="mb-4">Profile</h3>#}
-{#                <img class="profile-image" src="{% static 'image/default-user.png' %}"/>#}
-{#            </div>#}
-{#            <div class="profile-info-column">#}
-{#                <div class="profile-info-column-item">#}
-{#                    <span class="mb4 profile-info h5">Username</span>#}
-{#                    <input class="profile-info-input form-control" type="text" value="{{ user.username }}">#}
-{#                </div>#}
-{#                <div class="profile-info-column-item">#}
-{#                    <span class="mb4 profile-info h5">First Name</span>#}
-{#                    <input class="profile-info-input form-control" type="text" value="{{ user.first_name }}">#}
-{#                </div>#}
-{#                <div class="profile-info-column-item">#}
-{#                    <span class="mb4 profile-info h5">Last Name</span>#}
-{#                    <input class="profile-info-input form-control" type="text" value="{{ user.last_name }}">#}
-{#                </div>#}
-{#                <div class="profile-info-column-item">#}
-{#                    <span class="mb4 h5">Email</span>#}
-{#                    <input class="profile-info-input form-control" type="email" value="{{ user.email }}">#}
-{#                </div>#}
-{#                <div class="profile-info-column-item">#}
-{#                    {% if plan is None %}#}
-{#                        <a href="{% url 'dfs_subscribe_list' %}"><button class="btn btn-outline-success">Subscribe</button></a>#}
-{#                    {% else %}#}
-{#                        <span style="display: block" class="mb4 profile-info h5"><a href="">{{ plan.plan_name }} subscription</a></span>#}
-{#                        <button class="btn btn-outline-success">Change plan</button>#}
-{#                    {% endif %}#}
-{#                </div>#}
-                <div class="profile-info-column-item">
-                    <button type="submit" class="btn btn-primary btn-save-changes">Save changes</button>
-                </div>
-    {#            <div class="profile-right-column-item">#}
-    {#                <span class="mb4 h5">Grace period: </span> {{ plan.grace_period }} month#}
-{#                </div>#}
-{#            </div>#}
+<form class="profile-form" method="post">
+    <div class="profile-block">
+        <div class="profile-form__image">
+            <h1 class="profile-title">Profile</h1>
+            <img class="profile-image" src="{% static 'image/default-user.png' %}"/>
         </div>
-    </form>
+        <div class="profile-form__info">
+            {% csrf_token %}
+            {{ form|crispy }}
+
+            <div class="password-field">
+                <p>Password</p>
+                <a class="btn btn-outline-secondary profile-form-field__link" href="{% url 'change-password' %}">Change password</a>
+            </div>
+
+            <div>
+                {% if plan is None %}
+                    <p>Subscription</p>
+                    <a href="{% url 'dfs_subscribe_list' %}" class="btn btn-outline-success profile-form-field__link">Subscribe</a>
+                {% else %}
+                    <p><a href="">{{ plan.plan_name }} subscription</a></p>
+                    <a class="btn btn-outline-secondary profile-form-field__link" href="/">Change plan</a>
+                {% endif %}
+            </div>
+            <div class="profile-button">
+                <button type="submit" class="btn btn-primary profile-button__save">Save changes</button>
+            </div>
+        </div>
+    </div>
+</form>
 
 {% endblock %}
