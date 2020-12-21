@@ -78,24 +78,29 @@ def signup(request):
 
 @login_required
 def profile(request):
+    user = User.objects.get(pk=request.user.pk)
+    user_subscription = UserSubscription.objects.get_queryset().filter(user=user)
+
+    if user_subscription:
+        subscription = user_subscription[0]
+        user_plan = subscription.subscription.plan
+        user_subscription_id = subscription.pk
+    else:
+        user_plan = None
+        user_subscription_id = None
+
     if request.method == 'POST':
-        form = PasswordChangeFrom(request.POST, instance=request.user)
+        form = UserUpdateForm(request.POST, instance=request.user)
 
         if form.is_valid():
-           # form = UserUpdateForm(request.POST, instance=request.user)
             form.save()
 
             return redirect('profile')
 
-        #else:
-            #form = UserUpdateForm(instance=request.user)
-           # return redirect('profile')
-            # return render(valid_request, 'profile/profile.html', {'form': form})
-
     else:
         form = UserUpdateForm(instance=request.user)
 
-    return render(request, 'profile/profile.html', {'form': form})
+    return render(request, 'profile/profile.html', {'form': form, 'plan': user_plan, 'subscription_id': user_subscription_id})
 
 
 @login_required
@@ -104,16 +109,12 @@ def change_password(request):
         form = PasswordChangeForm(data=request.POST, user=request.user)
 
         if form.is_valid():
-            # form = UserUpdateForm(request.POST, instance=request.user)
             form.save()
             update_session_auth_hash(request, form.user)
             return redirect('profile')
+
         else:
             return redirect('change-password')
-        # else:
-        # form = UserUpdateForm(instance=request.user)
-        # return redirect('profile')
-        # return render(valid_request, 'profile/profile.html', {'form': form})
 
     else:
         form = PasswordChangeForm(user=request.user)

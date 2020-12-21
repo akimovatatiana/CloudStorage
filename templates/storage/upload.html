@@ -1,8 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{#<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">#}
+{#<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">#}
 
 {% block javascript %}
+{#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>#}
+{#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>#}
+{#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/plug-ins/1.10.22/sorting/file-size.js"></script>#}
+
+{#    <script src="{% static 'js/jquery/table-sorting.js' %}"></script>#}
     <script src="{% static 'fontawesome-free-5.15.1-web/js/all.js' %}"></script>
 
     <script src="{% static 'js/jquery/jquery-file-upload/vendor/jquery.ui.widget.js' %}"></script>
@@ -34,7 +41,7 @@
         <div class="before-table-content">
             <h2 class="overview-text">Overview</h2>
             <div class="storage-size-info"><span
-                    class="storage-size-info-text text-muted">{{ used_size }} of {{ capacity }} GB used</span></div>
+                    class="storage-size-info-text text-muted"><span class="used-size">{{ used_size }}</span> of {{ capacity }} GB used</span></div>
             <div class="storage-buttons">
                 <div class="delete-selected" style="display: none">
                     <button class="btn btn-outline-danger btn-delete-selected" type="submit">Delete</button>
@@ -49,13 +56,14 @@
         <table id="files-list" class="table table-striped">
             <thead class="thead-light">
             <tr>
-                <th scope="col">
+                <th scope="col" class="">
                     <input class="select-all" type="checkbox" />
                 </th>
                 <th scope="col">Preview</th>
-                <th scope="col">Filename</th>
-                <th scope="col">Uploaded at</th>
-                <th scope="col">Size</th>
+                <th scope="col"><span class="table-sortable-column-name">Filename<i class="fa fa-sort sort-icon ml-2"></i></span></th>
+                <th scope="col"><span class="table-sortable-column-name">Uploaded at<i class="fa fa-sort sort-icon ml-2"></i></span></th>
+                <th scope="col"><span class="table-sortable-column-name">Type<i class="fa fa-sort sort-icon ml-2"></i></span></th>
+                <th scope="col"><span class="table-sortable-column-name">Size<i class="fa fa-sort sort-icon ml-2"></i></span></th>
                 <th scope="col">Actions</th>
             </tr>
             </thead>
@@ -85,7 +93,8 @@
                     </td>
                     <td><a href="{{ file.file.url }}"><span class="filename">{{ file.title }} {{ file.file.content_type }}</span></a></td>
                     <td><span style>{{ file.uploaded_at }}</span></td>
-                    <td><span>{{ file.size }}</span></td>
+                    <td><span style>{{ file.type }}</span></td>
+                    <td>{{ file.size }}</td>
                     <td>
                         <div>
                             <div class="i-delete" type="submit" data-file-id="{{ file.id }}">

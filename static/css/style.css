@@ -243,6 +243,18 @@ body {
     margin-left: 15%;
 }
 
+.table-sortable-column-name:hover {
+    cursor: pointer;
+}
+
+.sort-icon {
+    display: none;
+}
+
+.sort-icon:hover {
+    cursor: pointer;
+}
+
 .btn-download-selected:after {
     font-family: "Font Awesome 5 Free";
     font-weight: 900;
@@ -350,6 +362,10 @@ body {
     margin-top: 15px;
 }
 
+.profile-form__info {
+    width: 280px;
+}
+
 .profile-form__image,
 .profile-form__info {
     margin: 0 30px;
@@ -357,13 +373,6 @@ body {
 
 .profile-form__image {
     margin-bottom: 30px;
-}
-
-@media (max-width: 640px) {
-    .profile-form__image,
-    .profile-form__info {
-        margin: 0 auto;
-    }
 }
 
 .profile-block {
@@ -382,8 +391,8 @@ body {
 }
 
 .password-block {
-    margin: 0 auto;
-    margin-top: 50px;
+    width: 310px;
+    margin: 50px auto 0;
 }
 
 .password-header {

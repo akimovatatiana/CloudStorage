@@ -77,6 +77,15 @@ $(function () {
         }
     });
 
+    function update_used_size() {
+        $.post("/api/used-size", { csrfmiddlewaretoken: getCookie("csrftoken") }, function (result) {
+            // let used_size = Number((result["size"]).toFixed(2));
+            let used_size = result["size"]
+
+            $("span[class='used-size']").text(used_size);
+        }, "json")
+    }
+
     $(".delete-selected").click(function () {
         let checked_inputs = $("input[type='checkbox'][class='file-checkbox']:checked");
         var files_id_to_delete = [];
@@ -100,6 +109,7 @@ $(function () {
             });
 
             $.post("/storage/remove-file", function (result) {
+                update_used_size()
             });
 
             setSelectAllStateButton()
@@ -116,12 +126,8 @@ $(function () {
         if (res) {
             let file_id = $($(this)[0]).data('file-id')
 
-            $.ajaxSetup({
-                data: {file_id: file_id, csrfmiddlewaretoken: getCookie("csrftoken")},
-                headers: {"X-CSRFToken": getCookie("csrftoken")}
-            });
-
-            $.post("/storage/remove-file", function (result) {
+            $.post("/storage/remove-file", { file_id: file_id, csrfmiddlewaretoken: getCookie("csrftoken") }, function (result) {
+                update_used_size()
             });
 
             $(this).closest('tr').remove();

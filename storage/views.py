@@ -4,73 +4,19 @@ import json
 from os import path
 from os.path import basename
 
+import django_filters
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse, Http404, FileResponse
 from django.views import View
 from django.utils.encoding import uri_to_iri
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .forms import FileForm
 from .models import File
 
 from subscriptions.models import UserSubscription
 from storage_subscriptions.models import StorageSubscription
-
-
-def beautify_size(value):
-    if value < 512000:
-        value = value / 1024.0
-        ext = 'KB'
-    elif value < 4194304000:
-        value = value / 1048576.0
-        ext = 'MB'
-    else:
-        value = value / 1073741824.0
-        ext = 'GB'
-    return '%s %s' % (str(round(value, 2)), ext)
-
-
-def get_used_size(files_list):
-    used_size = 0
-    for file in files_list:
-        file_path = str(settings.BASE_DIR) + uri_to_iri(file.file.url)
-
-        size = path.getsize(file_path)
-
-        used_size += size
-
-    return used_size
-
-
-def get_user_subscription(user):
-    return UserSubscription.objects.get_queryset().filter(user=user)
-
-
-def get_storage_capacity(request):
-    user_subscription = get_user_subscription(request.user)
-
-    if user_subscription:
-        user_plan_id = user_subscription[0].subscription.plan_id
-
-        storage_subscriptions = StorageSubscription.objects.filter(subscription=user_plan_id)
-        max_size = storage_subscriptions[0].size
-
-        return max_size
-
-    return 0
-
-
-def is_new_file_fit_in_storage(request):
-    capacity = get_storage_capacity(request)
-    user_id = request.user.id
-
-    files_list = File.objects.filter(user=user_id)
-    used_size = get_used_size(files_list) / 1048576.0
-
-    new_file_size = request.FILES['file'].size / 1048576.0
-    new_used_size = new_file_size + used_size
-
-    return new_used_size <= capacity
 
 
 class UploadView(View):
@@ -179,6 +125,7 @@ def download_compressed_files(request):
 
     response = HttpResponse(content_type='application/zip')
     archive = zipfile.ZipFile(response, 'w')
+
     for file_path in paths:
         archive.write(file_path, basename(file_path))
 
@@ -187,3 +134,69 @@ def download_compressed_files(request):
     response['Content-Disposition'] = 'attachment; filename={}'.format('cloud-archive.zip')
 
     return response
+
+
+def beautify_size(value):
+    if value < 512000:
+        value = value / 1024.0
+        ext = 'KB'
+    elif value < 4194304000:
+        value = value / 1048576.0
+        ext = 'MB'
+    else:
+        value = value / 1073741824.0
+        ext = 'GB'
+    return '%s %s' % (str(round(value, 2)), ext)
+
+
+def get_used_size(files_list):
+    used_size = 0
+    for file in files_list:
+        file_path = str(settings.BASE_DIR) + uri_to_iri(file.file.url)
+
+        size = path.getsize(file_path)
+
+        used_size += size
+
+    return used_size
+
+
+def get_user_subscription(user):
+    return UserSubscription.objects.get_queryset().filter(user=user)
+
+
+def get_storage_capacity(request):
+    user_subscription = get_user_subscription(request.user)
+
+    if user_subscription:
+        user_plan_id = user_subscription[0].subscription.plan_id
+
+        storage_subscriptions = StorageSubscription.objects.filter(subscription=user_plan_id)
+        capacity = storage_subscriptions[0].size
+
+        return capacity
+
+    return 0
+
+
+def is_new_file_fit_in_storage(request):
+    capacity = get_storage_capacity(request)
+    user_id = request.user.id
+
+    files_list = File.objects.filter(user=user_id)
+    used_size = get_used_size(files_list) / 1048576.0
+
+    new_file_size = request.FILES['file'].size / 1048576.0
+    new_used_size = new_file_size + used_size
+
+    return new_used_size <= capacity
+
+
+class FileFilter(django_filters.FilterSet):
+    queryset = File.objects.all()
+    filters_backend = [DjangoFilterBackend]
+    filterset_fields = ['title', 'type']
+
+    class Meta:
+        model = File
+        exclude = ['user', 'file']

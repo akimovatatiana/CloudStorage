@@ -25,11 +25,12 @@
                     <a href="{% url 'dfs_subscribe_list' %}" class="btn btn-outline-success profile-form-field__link">Subscribe</a>
                 {% else %}
                     <p><a href="">{{ plan.plan_name }} subscription</a></p>
-                    <a class="btn btn-outline-secondary profile-form-field__link" href="/">Change plan</a>
+                    <a class="btn btn-outline-secondary profile-form-field__link" href="{% url 'dfs_subscribe_cancel' subscription_id=subscription_id %}">Change plan</a>
+{#                    <input type="hidden" name="subscription_id" value="{{ plan.pk }}">#}
                 {% endif %}
             </div>
             <div class="profile-button">
-                <button type="submit" class="btn btn-primary profile-button__save">Save changes</button>
+                <button type="submit" class="btn btn-primary profile-button__save mb-4">Save changes</button>
             </div>
         </div>
     </div>
