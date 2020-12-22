@@ -5,6 +5,7 @@ import django_filters
 from os import path
 from os.path import basename
 
+import humanize
 from django.conf import settings
 from django.forms import models
 from django.shortcuts import render, redirect
@@ -146,16 +147,7 @@ def download_compressed_files(request):
 
 
 def beautify_size(value):
-    if value < 512000:
-        value = value / 1024.0
-        ext = 'KB'
-    elif value < 4194304000:
-        value = value / 1048576.0
-        ext = 'MB'
-    else:
-        value = value / 1073741824.0
-        ext = 'GB'
-    return '%s %s' % (str(round(value, 2)), ext)
+    return humanize.naturalsize(value).upper()
 
 
 def get_used_size(files_list):
@@ -200,7 +192,6 @@ def is_new_file_fit_in_storage(request):
 
     return new_used_size <= capacity
 
-IMAGES_MIME = ['image/png', 'image/jpg']
 
 FILTER_CHOICES = (
     ('Image', 'Image'),
@@ -210,10 +201,6 @@ FILTER_CHOICES = (
     ('Table', 'Table Sheet'),
     ('Presentation', 'Presentation'),
 )
-
-FILTER_CHOICES2 = {
-    "image": 'image'
-}
 
 
 class FileFilter(django_filters.FilterSet):
