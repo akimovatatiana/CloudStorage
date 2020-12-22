@@ -1,8 +1,8 @@
+import os
 import zipfile
 import json
 import django_filters
 
-from os import path
 from os.path import basename
 
 import humanize
@@ -16,6 +16,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django import forms
 
 from .forms import FileForm
+from .functions import beautify_size, get_used_size, get_file_type
 from .models import File
 
 from subscriptions.models import UserSubscription
@@ -39,7 +40,6 @@ class UploadView(View):
             capacity = int(get_storage_capacity(request) / 1000)
 
             file_filter = FileFilter(request.GET, queryset=files_list)
-            # search_filter = FileSearchFilter(request.GET, queryset=files_list)
 
             return render(self.request, 'storage/upload.html',
                           {'files': files_list,
@@ -52,27 +52,27 @@ class UploadView(View):
             return redirect('dfs_subscribe_list')
 
     def post(self, request):
-        post = request.POST.copy()
-        post.update({'title': str(request.FILES['file']), 'size': '0 kb'})
+        title = str(request.FILES['file'])
+        size = self.request.FILES['file'].size
+        beautified_size = beautify_size(self.request.FILES['file'].size)
+        content_type = get_file_type(self.request.FILES['file'].content_type)
+        token = request.POST.get('csrfmiddlewaretoken', '')
 
-        form = FileForm(post, self.request.FILES)
+        data = {
+            'user': self.request.user,
+            'title': title,
+            'size': beautified_size,
+            'type': content_type,
+            'csrfmiddlewaretoken': token,
+        }
 
-        if form.is_valid() and is_new_file_fit_in_storage(request):
-            form_with_unique_filename = form.save()
+        form = FileForm(files=request.FILES, data=data)
 
-            # Get unique filename from disk, add to form
-            filename = path.split(uri_to_iri(str(form_with_unique_filename.file.url)))[-1]
-            form_with_unique_filename.title = filename
+        if form.is_valid() and is_new_file_fit_in_storage(request, size):
+            file_form = form.save()
 
-            # Add file size to form
-            file_path = str(settings.BASE_DIR) + uri_to_iri(form_with_unique_filename.file.url)
-            file_size = beautify_size(path.getsize(file_path))
-            form_with_unique_filename.size = file_size
-
-            form_with_unique_filename.save()
-
-            data = {'is_valid': True, 'name': form_with_unique_filename.file.name,
-                    'url': uri_to_iri(form_with_unique_filename.file.url)}
+            data = {'is_valid': True, 'name': file_form.file.name,
+                    'url': uri_to_iri(file_form.file.url)}
         else:
             data = {'is_valid': False}
 
@@ -108,7 +108,7 @@ def download_file(request):
     if user_file:
         file_path = uri_to_iri(user_file.file.path)
 
-        if path.exists(file_path):
+        if os.path.exists(file_path):
             with open(file_path, 'rb') as file:
                 filename = user_file.file.name
 
@@ -131,7 +131,7 @@ def download_compressed_files(request):
 
     for file_id in files_id:
         file = File.objects.get(pk=file_id)
-        paths.append(path.join(settings.MEDIA_ROOT, uri_to_iri(file.file.path)))
+        paths.append(os.path.join(settings.MEDIA_ROOT, uri_to_iri(file.file.path)))
 
     response = HttpResponse(content_type='application/zip')
     archive = zipfile.ZipFile(response, 'w')
@@ -145,21 +145,6 @@ def download_compressed_files(request):
 
     return response
 
-
-def beautify_size(value):
-    return humanize.naturalsize(value).upper()
-
-
-def get_used_size(files_list):
-    used_size = 0
-    for file in files_list:
-        file_path = str(settings.BASE_DIR) + uri_to_iri(file.file.url)
-
-        size = path.getsize(file_path)
-
-        used_size += size
-
-    return used_size
 
 
 def get_user_subscription(user):
@@ -180,14 +165,16 @@ def get_storage_capacity(request):
     return 0
 
 
-def is_new_file_fit_in_storage(request):
+# TODO: Update accuracy
+
+def is_new_file_fit_in_storage(request, new_size):
     capacity = get_storage_capacity(request)
     user_id = request.user.id
 
     files_list = File.objects.filter(user=user_id)
     used_size = get_used_size(files_list) / 1048576.0
 
-    new_file_size = request.FILES['file'].size / 1048576.0
+    new_file_size = new_size / 1048576.0
     new_used_size = new_file_size + used_size
 
     return new_used_size <= capacity

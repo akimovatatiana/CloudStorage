@@ -9,7 +9,7 @@ from django.utils.encoding import uri_to_iri
 
 from cloud_storage import settings
 from storage.models import File
-from storage.views import beautify_size, get_used_size
+from storage.functions import beautify_size, get_used_size
 
 
 def get_used_size_json(request):
