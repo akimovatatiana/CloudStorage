@@ -1,16 +1,18 @@
 import zipfile
 import json
+import django_filters
 
 from os import path
 from os.path import basename
 
-import django_filters
 from django.conf import settings
+from django.forms import models
 from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse, Http404, FileResponse
 from django.views import View
 from django.utils.encoding import uri_to_iri
 from django_filters.rest_framework import DjangoFilterBackend
+from django import forms
 
 from .forms import FileForm
 from .models import File
@@ -30,13 +32,20 @@ class UploadView(View):
                 return redirect('dfs_subscribe_list')
 
             files_list = File.objects.filter(user=user_id).order_by('-uploaded_at')
+
             used_size = beautify_size(get_used_size(files_list))
+
             capacity = int(get_storage_capacity(request) / 1000)
+
+            file_filter = FileFilter(request.GET, queryset=files_list)
+            # search_filter = FileSearchFilter(request.GET, queryset=files_list)
 
             return render(self.request, 'storage/upload.html',
                           {'files': files_list,
                            'used_size': used_size,
-                           'capacity': capacity}
+                           'capacity': capacity,
+                           'filter': file_filter,
+                           }
                           )
         else:
             return redirect('dfs_subscribe_list')
@@ -191,12 +200,29 @@ def is_new_file_fit_in_storage(request):
 
     return new_used_size <= capacity
 
+IMAGES_MIME = ['image/png', 'image/jpg']
+
+FILTER_CHOICES = (
+    ('Image', 'Image'),
+    ('Audio', 'Audio'),
+    ('Video', 'Video'),
+    ('Document', 'Document'),
+    ('Table', 'Table Sheet'),
+    ('Presentation', 'Presentation'),
+)
+
+FILTER_CHOICES2 = {
+    "image": 'image'
+}
+
 
 class FileFilter(django_filters.FilterSet):
-    queryset = File.objects.all()
-    filters_backend = [DjangoFilterBackend]
-    filterset_fields = ['title', 'type']
+    title = django_filters.CharFilter(label="", lookup_expr='icontains',
+                                      widget=forms.TextInput(attrs={'autocomplete': 'off'}))
+    # type = django_filters.CharFilter(label="", lookup_expr='icontains')
+    type = django_filters.ChoiceFilter(label="", empty_label="All Types", choices=FILTER_CHOICES)
 
     class Meta:
         model = File
+        fields = ['title', 'type']
         exclude = ['user', 'file']

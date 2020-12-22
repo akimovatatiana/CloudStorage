@@ -82,6 +82,14 @@ body {
     }
 }
 
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 
 /* Plan cards styles */
 
@@ -213,8 +221,50 @@ body {
     align-items: center;
 }
 
-.storage-buttons > div:last-child {
+.before-table-content:hover {
+    cursor: pointer;
+}
+
+.search-filter-content {
+    display: none;
+}
+
+.search-filter-form {
+    width: 100%;
+    display: inline-flex;
+}
+
+.search-bar {
+    display: inline-flex;
+    align-items: flex-start;
+}
+
+.search-bar-form {
+    /*width: 200px;*/
+    display: inline-flex;
+}
+
+.search-bar-form > div {
+    width: 250px;
+}
+
+.search-button {
     margin-left: 15px;
+    width: 90px;
+}
+
+.filters-bar {
+    display: inline-flex;
+    margin-left: auto;
+}
+
+.filter-button {
+    margin-left: 5px;
+    border-radius: 4px;
+}
+
+.storage-buttons > div:last-child {
+    margin: 0 0 0 15px;
 }
 
 .storage-buttons {
@@ -228,8 +278,13 @@ body {
     display: inline-flex;
 }
 
+.search-bar-icon, .chevron-icon {
+    margin: 4px 0 0 12px;
+    color: #6c757d;
+}
+
 .storage-size-info-text {
-    cursor: default;
+    /*cursor: default;*/
     color: #495057;
     font-weight: bold;
 }
@@ -288,6 +343,8 @@ body {
 .action-icon:last-child {
     margin-left: 10%;
 }
+
+/* Profile styles */
 
 .profile-wrapper {
     margin-top: 5rem;
