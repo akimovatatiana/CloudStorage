@@ -41,6 +41,7 @@ def get_file_type(content_type):
 def beautify_size(value):
     return humanize.naturalsize(value).upper()
 
+
 def get_user_subscription(user):
     return UserSubscription.objects.get_queryset().filter(user=user)
 

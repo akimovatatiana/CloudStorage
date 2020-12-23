@@ -8,7 +8,7 @@ $(function () {
     dataType: 'json',
     done: function (e, data) {
       if (data.result.is_valid) {
-        window.location.replace('/storage/upload')
+        window.location.replace('/storage/overview')
         // $("#files-list tbody").prepend(
         //   "<tr>" +
         //     "<td><input type='checkbox' class='file-checkbox' value='{{ file.id }}' name='file-check' id='file-check-id'></td>" +

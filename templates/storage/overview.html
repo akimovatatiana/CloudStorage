@@ -32,12 +32,12 @@
 
             <div class="file-upload" style="display: inline-block">
                 <span>Or upload by</span>
-                <a href='' class="js-upload-files js-upload-files-link">
+                <a class="js-upload-files js-upload-files-link">
                     <span class="glyphicon glyphicon-cloud-upload">link</span>
                 </a>
                 <input id="fileupload" type="file" name="file" multiple
                        style="display: none;"
-                       data-url="{% url 'upload' %}"
+                       data-url="{% url 'overview' %}"
                        data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
             </div>
         </div>
@@ -93,6 +93,7 @@
                 <th scope="col">Actions</th>
             </tr>
             </thead>
+
             <tbody>
             {% csrf_token %}
             {% for file in files %}
@@ -105,14 +106,18 @@
                         <div class="image-wrapper" data-filepath="{{ file.file.url }}">
                             {% if file.type == 'Image' %}
                                 <img class="image-preview" src="{{ file.file.url }}"/>
+                            {% elif file.type == 'Video' %}
+                                <img class="image-preview" src={% static '/image/video.png' %}/>
                             {% elif file.type == 'Document' %}
                                 <img class="image-preview" src={% static '/image/doc.png' %}/>
                             {% elif file.type == 'Table' %}
                                 <img class="image-preview" src={% static '/image/xls.png' %}/>
                             {% elif file.type == 'Presentation' %}
                                 <img class="image-preview" src={% static '/image/ppt.png' %}/>
+                            {% elif file.type == 'Archive' %}
+                                <img class="image-preview" src={% static '/image/archive.png' %}/>
                             {% else %}
-                                <img class="image-preview" src={% static '/image/default-file-icon.gif' %}
+                                <img class="image-preview" src={% static '/image/default-file-icon.png' %}
                             {% endif %}
                             </div>
                     </td>
