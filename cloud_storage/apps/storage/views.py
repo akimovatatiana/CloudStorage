@@ -6,6 +6,7 @@ import django_filters
 from os.path import basename
 
 from django.conf import settings
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse, Http404
 from django.views import View
@@ -38,8 +39,18 @@ class UploadView(View):
 
             file_filter = FileFilter(request.GET, queryset=files_list)
 
+            page = request.GET.get('page', 1)
+            paginator = Paginator(file_filter.qs, 10)
+
+            try:
+                files = paginator.page(page)
+            except PageNotAnInteger:
+                files = paginator.page(1)
+            except EmptyPage:
+                files = paginator.page(paginator.num_pages)
+
             return render(self.request, 'storage/upload.html',
-                          {'files': files_list,
+                          {'files': files,
                            'used_size': used_size,
                            'capacity': capacity,
                            'filter': file_filter,
@@ -86,10 +97,8 @@ def remove_file(request):
             file = File.objects.get(pk=pk)
             file.file.delete()
             file.delete()
-            # print('Dummy multi delete ' + str(file))
     else:
         file = File.objects.get(pk=file_id)
-        # print('Dummy single delete ' + str(file))
 
         file.file.delete()
         file.delete()

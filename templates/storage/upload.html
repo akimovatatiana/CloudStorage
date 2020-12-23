@@ -3,16 +3,17 @@
 {% load static %}
 {% load crispy_forms_filters %}
 {% load humanize %}
+{% load storage_tags %}
 
 {#<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">#}
 {#<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">#}
 
 {% block javascript %}
-{#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>#}
-{#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>#}
-{#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/plug-ins/1.10.22/sorting/file-size.js"></script>#}
+    {#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>#}
+    {#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>#}
+    {#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/plug-ins/1.10.22/sorting/file-size.js"></script>#}
 
-{#    <script src="{% static 'js/jquery/table-sorting.js' %}"></script>#}
+    {#    <script src="{% static 'js/jquery/table-sorting.js' %}"></script>#}
     <script src="{% static 'fontawesome-free-5.15.1-web/js/all.js' %}"></script>
 
     <script src="{% static 'js/jquery/jquery-file-upload/vendor/jquery.ui.widget.js' %}"></script>
@@ -44,7 +45,8 @@
         <div class="before-table-content noselect">
             <h2 class="overview-text">Overview</h2>
             <div class="storage-size-info">
-                <span class="storage-size-info-text text-muted"><span class="used-size">{{ used_size }}</span> of {{ capacity }} GB used</span>
+                <span class="storage-size-info-text text-muted"><span
+                        class="used-size">{{ used_size }}</span> of {{ capacity }} GB used</span>
                 <i class="fa fa-chevron-down chevron-icon"></i>
             </div>
             <div class="storage-buttons">
@@ -60,39 +62,44 @@
 
         <div class="search-filter-content">
             <form method="get" class="search-filter-form">
-            <div class="search-bar">
+                <div class="search-bar">
                     <div class="search-bar-form">
                         {{ filter.form.title|as_crispy_field }}
                     </div>
                     <button type="submit" class="btn btn-outline-primary search-button">Search</button>
-            </div>
+                </div>
 
-            <div class="filters-bar">
-                {{ filter.form.type|as_crispy_field }}
-            </div>
+                <div class="filters-bar">
+                    {{ filter.form.type|as_crispy_field }}
+                </div>
             </form>
         </div>
 
         <table id="files-list" class="table table-striped">
             <thead class="thead-light">
-                <tr>
-                    <th scope="col" class="">
-                        <input class="select-all" type="checkbox" />
-                    </th>
-                    <th scope="col">Preview</th>
-                    <th scope="col"><span class="table-sortable-column-name">Filename<i class="fa fa-sort sort-icon ml-2"></i></span></th>
-                    <th scope="col"><span class="table-sortable-column-name">Uploaded<i class="fa fa-sort sort-icon ml-2"></i></span></th>
-                    <th scope="col"><span class="table-sortable-column-name">Type<i class="fa fa-sort sort-icon ml-2"></i></span></th>
-                    <th scope="col"><span class="table-sortable-column-name">Size<i class="fa fa-sort sort-icon ml-2"></i></span></th>
-                    <th scope="col">Actions</th>
-                </tr>
+            <tr>
+                <th scope="col" class="">
+                    <input class="select-all" type="checkbox"/>
+                </th>
+                <th scope="col">Preview</th>
+                <th scope="col"><span class="table-sortable-column-name">Filename<i
+                        class="fa fa-sort sort-icon ml-2"></i></span></th>
+                <th scope="col"><span class="table-sortable-column-name">Uploaded<i
+                        class="fa fa-sort sort-icon ml-2"></i></span></th>
+                <th scope="col"><span class="table-sortable-column-name">Type<i
+                        class="fa fa-sort sort-icon ml-2"></i></span></th>
+                <th scope="col"><span class="table-sortable-column-name">Size<i
+                        class="fa fa-sort sort-icon ml-2"></i></span></th>
+                <th scope="col">Actions</th>
+            </tr>
             </thead>
             <tbody>
             {% csrf_token %}
-            {% for file in filter.qs %}
+            {% for file in files %}
                 <tr class="current-file">
                     <td>
-                        <input type="checkbox" class='file-checkbox' value="{{ file.id }}" name="file-check" id="file-check-id">
+                        <input type="checkbox" class='file-checkbox' value="{{ file.id }}" name="file-check"
+                               id="file-check-id">
                     </td>
                     <td>
                         <div class="image-wrapper" data-filepath="{{ file.file.url }}">
@@ -107,9 +114,10 @@
                             {% else %}
                                 <img class="image-preview" src={% static '/image/default-file-icon.gif' %}
                             {% endif %}
-                        </div>
+                            </div>
                     </td>
-                    <td><a href="{{ file.file.url }}"><span class="filename">{{ file.title }} {{ file.file.content_type }}</span></a></td>
+                    <td><a href="{{ file.file.url }}"><span
+                            class="filename">{{ file.title }} {{ file.file.content_type }}</span></a></td>
                     <td><span style>{{ file.uploaded_at|naturalday|title }}</span></td>
                     <td><span style>{{ file.type }}</span></td>
                     <td>{{ file.size }}</td>
@@ -127,9 +135,42 @@
                         </div>
                     </td>
                 </tr>
-                {% empty %}
+            {% empty %}
             {% endfor %}
             </tbody>
         </table>
+
+
+        {% if files.has_other_pages %}
+            <nav>
+                <ul class="pagination justify-content-end">
+                    {% if files.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% url_replace request 'page' files.previous_page_number %}">Prev</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Prev</span></li>
+                    {% endif %}
+
+                    {% for i in files.paginator.page_range %}
+                        {% if files.number == i %}
+                            <li class="page-item active"><span class="page-link">{{ i }} <span class="sr-only"></span></span></li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% url_replace request 'page' i %}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if files.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% url_replace request 'page' files.next_page_number %}">Next</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
     </div>
 {% endblock %}
