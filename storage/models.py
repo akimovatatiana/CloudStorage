@@ -23,9 +23,10 @@ class File(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-        self.title = os.path.split(uri_to_iri(str(self.file.url)))[-1]
+        if self.file:
+            self.title = os.path.split(uri_to_iri(str(self.file.url)))[-1]
 
-        super().save(update_fields=['title'])
+            super().save(update_fields=['title'])
 
     def extension(self):
         name, extension = os.path.splitext(self.file.name)

@@ -15,10 +15,13 @@ $(function () {
 
     window.onload = function() {
         let search_bar_value = $.trim($(".search-bar-form > div > div > input").val())
+        let select_value = $("select[name='type'] > option:selected").text()
 
-        if (search_bar_value.length > 0) {
-            showSearchFilterContent()
+        if (search_bar_value.length === 0 && select_value === "All Types") {
+            return
         }
+
+        showSearchFilterContent()
     }
 
     function getCookie(c_name) {
@@ -172,20 +175,24 @@ $(function () {
         let icon = $(".chevron-icon")
 
         icon.removeClass('fa-chevron-down').addClass('fa-chevron-up')
-        search_filter_content.style.display = 'flex';
+        search_filter_content.style.display = 'block';
+    }
+
+    function hideSearchFilterContent() {
+        let search_filter_content = $("div[class='search-filter-content']")[0];
+        let icon = $(".chevron-icon")
+
+        icon.removeClass('fa-chevron-up').addClass('fa-chevron-down')
+        search_filter_content.style.display = 'none';
     }
 
     $(".before-table-content").click(function(e) {
         let search_filter_content = $("div[class='search-filter-content']")[0];
-        let icon = $(".chevron-icon")
 
-        if (search_filter_content.style.display === 'flex') {
-            icon.removeClass('fa-chevron-up').addClass('fa-chevron-down')
-            search_filter_content.style.display = 'none';
+        if (search_filter_content.style.display === 'block') {
+            hideSearchFilterContent()
         } else {
-            icon.removeClass('fa-chevron-down').addClass('fa-chevron-up')
-            search_filter_content.style.display = 'flex'
-            // showSearchFilterContent()
+            showSearchFilterContent()
         }
     })
 

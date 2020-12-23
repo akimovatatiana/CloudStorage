@@ -231,7 +231,7 @@ body {
 
 .search-filter-form {
     width: 100%;
-    display: inline-flex;
+    display: flex;
 }
 
 .search-bar {

@@ -193,7 +193,6 @@ FILTER_CHOICES = (
 class FileFilter(django_filters.FilterSet):
     title = django_filters.CharFilter(label="", lookup_expr='icontains',
                                       widget=forms.TextInput(attrs={'autocomplete': 'off'}))
-    # type = django_filters.CharFilter(label="", lookup_expr='icontains')
     type = django_filters.ChoiceFilter(label="", empty_label="All Types", choices=FILTER_CHOICES)
 
     class Meta:
