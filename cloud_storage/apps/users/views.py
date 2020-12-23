@@ -1,7 +1,3 @@
-from functools import update_wrapper
-
-from django.utils.decorators import classonlymethod
-
 from .forms import *
 
 from django.contrib.auth import login, authenticate
@@ -9,11 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.shortcuts import render, redirect, reverse
-from django.shortcuts import get_object_or_404
 
 from subscriptions.models import UserSubscription
 from subscriptions import views as sub_views
-from subscriptions import forms as sub_forms
 
 
 def get_user(request, pk):

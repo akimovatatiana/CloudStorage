@@ -42,9 +42,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'subscriptions',
     'crispy_forms',
-    'users',
-    'storage',
-    'storage_subscriptions'
+    'cloud_storage.apps.users',
+    'cloud_storage.apps.storage',
+    'cloud_storage.apps.storage_subscriptions'
 ]
 
 REST_FRAMEWORK = {

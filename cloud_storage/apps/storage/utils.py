@@ -6,8 +6,8 @@ from django.utils.encoding import uri_to_iri
 from subscriptions.models import UserSubscription
 
 from cloud_storage import settings
-from storage.constants import mime_dict
-from storage_subscriptions.models import StorageSubscription
+from cloud_storage.apps.storage.constants import mime_dict
+from cloud_storage.apps.storage_subscriptions.models import StorageSubscription
 
 
 def get_used_size(files_list):

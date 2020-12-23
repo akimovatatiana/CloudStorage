@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils.encoding import uri_to_iri
 
-from storage.functions import get_upload_path
+from cloud_storage.apps.storage.utils import get_upload_path
 
 
 class File(models.Model):

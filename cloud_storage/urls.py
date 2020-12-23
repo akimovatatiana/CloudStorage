@@ -13,7 +13,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-import importlib
 
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -24,9 +23,9 @@ from cloud_storage import settings
 urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('subscriptions/', include('subscriptions.urls')),
-                  path('users/', include('users.urls')),
-                  path('storage/', include('storage.urls')),
-                  path('api/', include('api.urls')),
+                  path('users/', include('cloud_storage.apps.users.urls')),
+                  path('storage/', include('cloud_storage.apps.storage.urls')),
+                  path('api/', include('cloud_storage.apps.api.urls')),
 
                   # path('api-auth/', include('rest_framework.urls'))
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

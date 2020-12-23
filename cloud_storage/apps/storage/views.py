@@ -5,22 +5,19 @@ import django_filters
 
 from os.path import basename
 
-import humanize
 from django.conf import settings
-from django.forms import models
 from django.shortcuts import render, redirect
-from django.http import JsonResponse, HttpResponse, Http404, FileResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from django.views import View
 from django.utils.encoding import uri_to_iri
-from django_filters.rest_framework import DjangoFilterBackend
 from django import forms
 
 from .forms import FileForm
-from .functions import *
+from .utils import beautify_size, get_used_size, get_file_type
 from .models import File
 
 from subscriptions.models import UserSubscription
-from storage_subscriptions.models import StorageSubscription
+from cloud_storage.apps.storage_subscriptions.models import StorageSubscription
 
 
 class UploadView(View):
@@ -145,6 +142,24 @@ def download_compressed_files(request):
 
     return response
 
+
+
+def get_user_subscription(user):
+    return UserSubscription.objects.get_queryset().filter(user=user)
+
+
+def get_storage_capacity(request):
+    user_subscription = get_user_subscription(request.user)
+
+    if user_subscription:
+        user_plan_id = user_subscription[0].subscription.plan_id
+
+        storage_subscriptions = StorageSubscription.objects.filter(subscription=user_plan_id)
+        capacity = storage_subscriptions[0].size
+
+        return capacity
+
+    return 0
 
 
 # TODO: Update accuracy

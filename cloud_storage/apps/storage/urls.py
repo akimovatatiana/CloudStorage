@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from storage import views as storage_views
+from cloud_storage.apps.storage import views as storage_views
 
 urlpatterns = [
     url('upload', storage_views.UploadView.as_view(), name='upload'),
