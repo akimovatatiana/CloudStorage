@@ -16,7 +16,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django import forms
 
 from .forms import FileForm
-from .functions import beautify_size, get_used_size, get_file_type
+from .functions import *
 from .models import File
 
 from subscriptions.models import UserSubscription
@@ -145,24 +145,6 @@ def download_compressed_files(request):
 
     return response
 
-
-
-def get_user_subscription(user):
-    return UserSubscription.objects.get_queryset().filter(user=user)
-
-
-def get_storage_capacity(request):
-    user_subscription = get_user_subscription(request.user)
-
-    if user_subscription:
-        user_plan_id = user_subscription[0].subscription.plan_id
-
-        storage_subscriptions = StorageSubscription.objects.filter(subscription=user_plan_id)
-        capacity = storage_subscriptions[0].size
-
-        return capacity
-
-    return 0
 
 
 # TODO: Update accuracy
