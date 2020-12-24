@@ -3,9 +3,8 @@ import os
 import posixpath
 import zipfile
 import json
-from pathlib import Path
 
-import django_filters
+from pathlib import Path
 
 from os.path import basename
 
@@ -31,40 +30,33 @@ from cloud_storage.apps.storage_subscriptions.models import StorageSubscription
 class UploadView(View):
     def get(self, request):
         user_id = request.user.id
+        user_subscription = get_user_subscription(user_id)
 
-        if user_id is not None:
-            user_subscription = get_user_subscription(user_id)
-
-            if not user_subscription:
-                return redirect('dfs_subscribe_list')
-
-            files_list = File.objects.filter(user=user_id).order_by('-uploaded_at')
-
-            used_size = beautify_size(get_used_size(files_list))
-
-            capacity = int(get_storage_capacity(request) / 1000)
-
-            file_filter = FileFilter(request.GET, queryset=files_list)
-
-            page = request.GET.get('page', 1)
-            paginator = Paginator(file_filter.qs, 10)
-
-            try:
-                files = paginator.page(page)
-            except PageNotAnInteger:
-                files = paginator.page(1)
-            except EmptyPage:
-                files = paginator.page(paginator.num_pages)
-
-            return render(self.request, 'storage/overview.html',
-                          {'files': files,
-                           'used_size': used_size,
-                           'capacity': capacity,
-                           'filter': file_filter,
-                           }
-                          )
-        else:
+        if not user_subscription:
             return redirect('dfs_subscribe_list')
+
+        files_list = File.objects.filter(user=user_id).order_by('-uploaded_at')
+        used_size = beautify_size(get_used_size(files_list))
+        capacity = int(get_storage_capacity(request) / 1000)
+
+        file_filter = FileFilter(request.GET, queryset=files_list)
+
+        page = request.GET.get('page', 1)
+        paginator = Paginator(file_filter.qs, 10)
+
+        try:
+            files = paginator.page(page)
+        except PageNotAnInteger:
+            files = paginator.page(1)
+        except EmptyPage:
+            files = paginator.page(paginator.num_pages)
+
+        return render(self.request, 'storage/overview.html', {
+            'files': files,
+            'used_size': used_size,
+            'capacity': capacity,
+            'filter': file_filter,
+        })
 
     def post(self, request):
         title = str(request.FILES['file'])
@@ -83,7 +75,7 @@ class UploadView(View):
 
         form = FileForm(files=request.FILES, data=data)
 
-        if form.is_valid() and is_new_file_fit_in_storage(request, size):
+        if form.is_valid() and is_space_available(request, size):
             file_form = form.save()
 
             data = {'is_valid': True, 'name': file_form.file.name,
@@ -94,6 +86,7 @@ class UploadView(View):
         return JsonResponse(data)
 
 
+@login_required()
 def remove_file(request):
     file_id = request.POST.get('file_id', '')
 
@@ -113,6 +106,7 @@ def remove_file(request):
     return redirect('overview')
 
 
+@login_required()
 def download_file(request):
     user_id = request.user
     file_id = request.POST.get('file_id', '')
@@ -136,6 +130,7 @@ def download_file(request):
     return redirect('overview')
 
 
+@login_required()
 def download_compressed_files(request):
     user = request.user
     files_id = json.loads(request.POST.get('files_id', ''))
@@ -143,7 +138,7 @@ def download_compressed_files(request):
     paths = []
 
     for file_id in files_id:
-        file = File.objects.get(pk=file_id)
+        file = File.objects.get(pk=file_id, user_id=user.id)
         paths.append(os.path.join(settings.MEDIA_ROOT, uri_to_iri(file.file.path)))
 
     response = HttpResponse(content_type='application/zip')
@@ -159,6 +154,7 @@ def download_compressed_files(request):
     return response
 
 
+@login_required()
 def get_storage_capacity(request):
     user_subscription = get_user_subscription(request.user)
 
@@ -175,15 +171,15 @@ def get_storage_capacity(request):
 
 # TODO: Update accuracy
 
-def is_new_file_fit_in_storage(request, new_size):
+def is_space_available(request, size):
     capacity = get_storage_capacity(request)
     user_id = request.user.id
 
     files_list = File.objects.filter(user=user_id)
     used_size = get_used_size(files_list) / 1048576.0
 
-    new_file_size = new_size / 1048576.0
-    new_used_size = new_file_size + used_size
+    formatted_size = size / 1048576.0
+    new_used_size = formatted_size + used_size
 
     return new_used_size <= capacity
 
@@ -225,48 +221,45 @@ def serve_protected_file(request, path, document_root=None, show_indexes=False):
     return response
 
 
+@login_required()
 def get_storage_stats(request):
     user_id = request.user.id
+    user_subscription = get_user_subscription(user_id)
 
-    if user_id is not None:
-        user_subscription = get_user_subscription(user_id)
+    if not user_subscription:
+        return redirect('dfs_subscribe_list')
 
-        if not user_subscription:
-            return redirect('dfs_subscribe_list')
+    files_list = File.objects.filter(user=user_id)
 
-        files_list = File.objects.filter(user=user_id)
+    used_size = beautify_size(get_used_size(files_list))
+    files_count = files_list.count()
 
-        used_size = beautify_size(get_used_size(files_list))
-        files_count = files_list.count()
+    largest_file_size = 0
+    largest_file_title = ""
 
-        largest_file_size = 0
-        largest_file_title = ""
+    types_dict = {}
 
-        types_dict = {}
+    for file in files_list:
+        file_path = str(settings.BASE_DIR) + uri_to_iri(file.file.url)
 
-        for file in files_list:
-            file_path = str(settings.BASE_DIR) + uri_to_iri(file.file.url)
+        size = os.path.getsize(file_path)
 
-            size = os.path.getsize(file_path)
+        if size > largest_file_size:
+            largest_file_title = file.title
+            largest_file_size = size
 
-            if size > largest_file_size:
-                largest_file_title = file.title
-                largest_file_size = size
-
-            if file.type in types_dict:
-                types_dict[file.type] += 1
-            else:
-                types_dict[file.type] = 1
+        if file.type in types_dict:
+            types_dict[file.type] += 1
+        else:
+            types_dict[file.type] = 1
 
         largest_file_size = beautify_size(largest_file_size)
 
-    return render(request, 'storage/stats.html',
-                  {
-                      'used_size': used_size,
-                      'files_count': files_count,
-                      'largest_file_title': largest_file_title,
-                      'largest_file_size': largest_file_size,
-                      'data': list(types_dict.values()),
-                      'labels': list(types_dict.keys())
-                   }
-                  )
+    return render(request, 'storage/stats.html', {
+        'used_size': used_size,
+        'files_count': files_count,
+        'largest_file_title': largest_file_title,
+        'largest_file_size': largest_file_size,
+        'data': list(types_dict.values()),
+        'labels': list(types_dict.keys())
+    })
