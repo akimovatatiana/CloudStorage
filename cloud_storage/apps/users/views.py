@@ -6,7 +6,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect
 
 from subscriptions.models import UserSubscription, SubscriptionPlan
 from subscriptions import views as sub_views
@@ -67,7 +67,8 @@ def profile(request):
     else:
         form = UserUpdateForm(instance=request.user)
 
-    return render(request, 'profile/profile.html', {'form': form, 'plan': user_plan, 'subscription_id': user_subscription_id})
+    return render(request, 'profile/profile.html', {'form': form, 'plan': user_plan,
+                                                    'subscription_id': user_subscription_id})
 
 
 @login_required
