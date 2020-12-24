@@ -38,6 +38,7 @@ class SignUpView(View):
                 login(request, user)
 
                 return sub_views.SubscribeView.as_view()(request)
+
         else:
             return render(self.request, 'registration/signup.html', {'form': form, 'plan_id': plan_id})
 
