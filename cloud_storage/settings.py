@@ -54,9 +54,13 @@ CACHES = {
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient"
         },
-        "KEY_PREFIX": "example"
+        "KEY_PREFIX": "redis"
     }
 }
+
+CACHE_TTL = 60 * 15
+
+# SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 

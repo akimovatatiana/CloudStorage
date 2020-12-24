@@ -10,14 +10,22 @@ from os.path import basename
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.core.cache import cache
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage, Page
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse, Http404, FileResponse, HttpResponseNotModified
 from django.utils._os import safe_join
+from django.utils.decorators import method_decorator
+from django.utils.functional import cached_property
 from django.utils.http import http_date
 from django.views import View
 from django.utils.encoding import uri_to_iri
+from django.views.decorators.cache import cache_page
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.vary import vary_on_cookie
 from django.views.static import was_modified_since, directory_index
+from django_redis import get_redis_connection
 
 from .filters import FileFilter
 from .forms import FileForm
@@ -26,8 +34,132 @@ from .models import File
 
 from cloud_storage.apps.storage_subscriptions.models import StorageSubscription
 
+CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
+
+
+class CachedPaginator(Paginator):
+    """A paginator that caches the results on a page by page basis."""
+
+    def __init__(self, object_list, per_page, orphans=0, allow_empty_first_page=True, cache_key=None,
+                 cache_timeout=300):
+        super(CachedPaginator, self).__init__(object_list, per_page, orphans, allow_empty_first_page)
+
+        self.cache_key = cache_key
+        self.cache_timeout = cache_timeout
+
+    @cached_property
+    def count(self):
+        """
+            The original django.core.paginator.count attribute in Django1.8
+            is not writable and cant be setted manually, but we would like
+            to override it when loading data from cache. (instead of recalculating it).
+            So we make it writable via @cached_property.
+        """
+        return super(CachedPaginator, self).count
+
+    def set_count(self, count):
+        """
+            Override the paginator.count value (to prevent recalculation)
+            and clear num_pages and page_range which values depend on it.
+        """
+        self.count = count
+        # if somehow we have stored .num_pages or .page_range (which are cached properties)
+        # this can lead to wrong page calculations (because they depend on paginator.count value)
+        # so we clear their values to force recalculations on next calls
+        try:
+            del self.num_pages
+        except AttributeError:
+            pass
+        try:
+            del self.page_range
+        except AttributeError:
+            pass
+
+    @cached_property
+    def num_pages(self):
+        """This is not writable in Django1.8. We want to make it writable"""
+        return super(CachedPaginator, self).num_pages
+
+    @cached_property
+    def page_range(self):
+        """This is not writable in Django1.8. We want to make it writable"""
+        return super(CachedPaginator, self).page_range
+
+    def page(self, number):
+        """
+        Returns a Page object for the given 1-based page number.
+
+        This will attempt to pull the results out of the cache first, based on
+        the requested page number. If not found in the cache,
+        it will pull a fresh list and then cache that result + the total result count.
+        """
+        if self.cache_key is None:
+            return super(CachedPaginator, self).page(number)
+
+        # In order to prevent counting the queryset
+        # we only validate that the provided number is integer
+        # The rest of the validation will happen when we fetch fresh data.
+        # so if the number is invalid, no cache will be setted
+        # number = self.validate_number(number)
+        try:
+            number = int(number)
+        except (TypeError, ValueError):
+            raise PageNotAnInteger('That page number is not an integer')
+
+        page_cache_key = "%s:%s:%s" % (self.cache_key, self.per_page, number)
+        page_data = cache.get(page_cache_key)
+
+        if page_data is None:
+            page = super(CachedPaginator, self).page(number)
+            # cache not only the objects, but the total count too.
+            page_data = (page.object_list, self.count)
+            cache.set(page_cache_key, page_data, self.cache_timeout)
+        else:
+            cached_object_list, cached_total_count = page_data
+            self.set_count(cached_total_count)
+            page = Page(cached_object_list, number, self)
+
+        return page
+
+
+class CacheMixin(object):
+    cache_timeout = CACHE_TTL
+
+    def get_cache_timeout(self):
+        return self.cache_timeout
+
+    @method_decorator(vary_on_cookie)
+    @method_decorator(csrf_protect)
+    def dispatch(self, *args, **kwargs):
+        return cache_page(self.get_cache_timeout())(super(CacheMixin, self).dispatch)(*args, **kwargs)
+
+
+def flush_cache():
+    get_redis_connection("default").clear()
+
 
 class UploadView(View):
+    def get_storage_used_size_from_db(self, files):
+        used_size = beautify_size(get_used_size(files))
+
+    def get_data_from_db(self):
+        user_id = self.request.user.id
+
+        files_list = File.objects.filter(user=user_id).order_by('-uploaded_at')
+        used_size = beautify_size(get_used_size(files_list))
+        capacity = int(get_storage_capacity(self.request) / 1000)
+
+        data = {
+            'files_list': files_list,
+            'used_size': used_size,
+            'capacity': capacity,
+        }
+
+        return data
+
+    @method_decorator(cache_page(CACHE_TTL))
+    @method_decorator(vary_on_cookie)
+    @method_decorator(login_required)
     def get(self, request):
         user_id = request.user.id
         user_subscription = get_user_subscription(user_id)
@@ -35,14 +167,24 @@ class UploadView(View):
         if not user_subscription:
             return redirect('dfs_subscribe_list')
 
-        files_list = File.objects.filter(user=user_id).order_by('-uploaded_at')
-        used_size = beautify_size(get_used_size(files_list))
-        capacity = int(get_storage_capacity(request) / 1000)
+        # cache_key = "data" + str(user_id)
+        cache_key = "data" + request.session.session_key
 
-        file_filter = FileFilter(request.GET, queryset=files_list)
+        # if cache_key in cache:
+        #     data = cache.get(cache_key)
+        # else:
+        #     data = self.get_data_from_db()
+        #     print('tanya')
+        #     cache.set(cache_key, data, CACHE_TTL)
 
-        page = request.GET.get('page', 1)
+        data = self.get_data_from_db()
+
+        file_filter = FileFilter(self.request.GET, queryset=data['files_list'])
+        page = self.request.GET.get('page', 1)
         paginator = Paginator(file_filter.qs, 10)
+        # paginator = CachedPaginator(file_filter.qs, 10, cache_key=cache_key, cache_timeout=CACHE_TTL)
+
+        # paginator_cache_key = "%s:%s:%s" % (cache_key, paginator.per_page, page)
 
         try:
             files = paginator.page(page)
@@ -51,12 +193,10 @@ class UploadView(View):
         except EmptyPage:
             files = paginator.page(paginator.num_pages)
 
-        return render(self.request, 'storage/overview.html', {
-            'files': files,
-            'used_size': used_size,
-            'capacity': capacity,
-            'filter': file_filter,
-        })
+        data['files'] = files
+        data['filter'] = file_filter
+
+        return render(self.request, 'storage/overview.html', data)
 
     def post(self, request):
         title = str(request.FILES['file'])
@@ -102,6 +242,8 @@ def remove_file(request):
 
         file.file.delete()
         file.delete()
+
+    flush_cache()
 
     return redirect('overview')
 
@@ -221,6 +363,9 @@ def serve_protected_file(request, path, document_root=None, show_indexes=False):
     return response
 
 
+# @login_required()
+@cache_page(CACHE_TTL)
+@vary_on_cookie
 @login_required()
 def get_storage_stats(request):
     user_id = request.user.id
@@ -253,7 +398,7 @@ def get_storage_stats(request):
         else:
             types_dict[file.type] = 1
 
-        largest_file_size = beautify_size(largest_file_size)
+    largest_file_size = beautify_size(largest_file_size)
 
     return render(request, 'storage/stats.html', {
         'used_size': used_size,

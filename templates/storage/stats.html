@@ -49,9 +49,13 @@
 <div class="col-8">
     <div class="">
         <h1 class="display-4">Storage Stats</h1>
+    </div>
+
+    <div>
+        <canvas id="pie-chart"></canvas>
         <a href="{% url 'overview' %}">Open storage</a>
     </div>
-    {% csrf_token %}
+
     <div>
         <span class="h3">Used size: </span>
         <span>{{ used_size }}</span>
@@ -63,11 +67,6 @@
     <div>
         <span class="h3">Largest file: </span>
         <span><a href="#">{{ largest_file_title }}</a> ({{ largest_file_size }})</span>
-    </div>
-
-    <div>
-        <p class="h3">Files chart:</p>
-        <canvas id="pie-chart"></canvas>
     </div>
 </div>
 
