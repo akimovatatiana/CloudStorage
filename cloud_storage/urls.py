@@ -13,22 +13,22 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
+import debug_toolbar
+from django.conf.urls import url
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include
 
 from cloud_storage import settings
 
 from cloud_storage.apps.storage.views import serve_protected_file
 
 urlpatterns = [
-                  path('admin/', admin.site.urls),
-                  path('subscriptions/', include('subscriptions.urls')),
-                  path('users/', include('cloud_storage.apps.users.urls')),
-                  path('storage/', include('cloud_storage.apps.storage.urls')),
-                  path('api/', include('cloud_storage.apps.api.urls')),
-                  # path(r'^media/(?P<file>.*)$', serve_protected_file, name='serve_protected_file'),
-                  # path(r'^media/(?P<path>.*)$', serve_protected_file, {'document_root': settings.MEDIA_ROOT}),
+    url('api/', include('cloud_storage.apps.api.urls')),
+    url('__debug__/', include(debug_toolbar.urls)),
+    url('admin/', admin.site.urls),
+    url('users/', include('cloud_storage.apps.users.urls')),
+    url('subscriptions/', include('subscriptions.urls')),
+    url('storage/', include('cloud_storage.apps.storage.urls')),
 
-              ] + static(settings.MEDIA_URL, view=serve_protected_file, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, view=serve_protected_file, document_root=settings.MEDIA_ROOT)
