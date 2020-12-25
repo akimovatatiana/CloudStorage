@@ -15,6 +15,7 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage, Page
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse, Http404, FileResponse, HttpResponseNotModified
+from django.template import RequestContext
 from django.utils._os import safe_join
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
@@ -139,51 +140,67 @@ def flush_cache():
 
 
 class UploadView(View):
-    def get_storage_used_size_from_db(self, files):
-        used_size = beautify_size(get_used_size(files))
+    def _get_storage_used_size(self, files_list):
+        return beautify_size(get_used_size(files_list))
 
-    def get_data_from_db(self):
+    def _get_context_from_db(self):
         user_id = self.request.user.id
 
         files_list = File.objects.filter(user=user_id).order_by('-uploaded_at')
-        used_size = beautify_size(get_used_size(files_list))
+        # used_size = beautify_size(get_used_size(files_list))
         capacity = int(get_storage_capacity(self.request) / 1000)
 
         data = {
             'files_list': files_list,
-            'used_size': used_size,
+            # 'used_size': used_size,
             'capacity': capacity,
         }
 
         return data
 
-    @method_decorator(cache_page(CACHE_TTL))
-    @method_decorator(vary_on_cookie)
-    @method_decorator(login_required)
+    def _generate_cache_key(self, key_prefix):
+        return f'{key_prefix}:{self.request.session.session_key}'
+
+    # @method_decorator(cache_page(CACHE_TTL))
+    # @method_decorator(vary_on_cookie)
+    # @method_decorator(login_required)
     def get(self, request):
-        user_id = request.user.id
-        user_subscription = get_user_subscription(user_id)
+        subscription_cache_key = self._generate_cache_key("subscription")
+        if subscription_cache_key in cache:
+            user_subscription = cache.get(subscription_cache_key)
+        else:
+            user_subscription = get_user_subscription(request.user.id)
+            cache.set(subscription_cache_key, user_subscription)
 
         if not user_subscription:
             return redirect('dfs_subscribe_list')
 
-        # cache_key = "data" + str(user_id)
-        cache_key = "data" + request.session.session_key
+        data_cache_key = self._generate_cache_key("data")
 
-        # if cache_key in cache:
-        #     data = cache.get(cache_key)
-        # else:
-        #     data = self.get_data_from_db()
-        #     print('tanya')
-        #     cache.set(cache_key, data, CACHE_TTL)
+        if data_cache_key in cache:
+            context = cache.get(data_cache_key)
+        else:
+            context = self._get_context_from_db()
+            cache.set(data_cache_key, context, CACHE_TTL)
 
-        data = self.get_data_from_db()
+        files_list = context['files_list']
 
-        file_filter = FileFilter(self.request.GET, queryset=data['files_list'])
+        # user_subscription = get_user_subscription(request.user.id)
+        # data = self._get_data_from_db()
+        # used_size = beautify_size(get_used_size(files_list))
+
+        used_size_cache_key = self._generate_cache_key("used_size")
+        if used_size_cache_key in cache:
+            used_size = cache.get(used_size_cache_key)
+        else:
+            used_size = beautify_size(get_used_size(files_list))
+            cache.set(used_size_cache_key, used_size)
+
+        file_filter = FileFilter(self.request.GET, queryset=files_list)
+
         page = self.request.GET.get('page', 1)
         paginator = Paginator(file_filter.qs, 10)
         # paginator = CachedPaginator(file_filter.qs, 10, cache_key=cache_key, cache_timeout=CACHE_TTL)
-
         # paginator_cache_key = "%s:%s:%s" % (cache_key, paginator.per_page, page)
 
         try:
@@ -193,10 +210,11 @@ class UploadView(View):
         except EmptyPage:
             files = paginator.page(paginator.num_pages)
 
-        data['files'] = files
-        data['filter'] = file_filter
+        context['files'] = files
+        context['filter'] = file_filter
+        context['used_size'] = used_size
 
-        return render(self.request, 'storage/overview.html', data)
+        return render(self.request, 'storage/overview.html', context)
 
     def post(self, request):
         title = str(request.FILES['file'])

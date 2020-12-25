@@ -60,7 +60,7 @@ CACHES = {
 
 CACHE_TTL = 60 * 15
 
-# SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
