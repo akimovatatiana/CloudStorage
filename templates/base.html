@@ -17,8 +17,12 @@
         {% include 'snippets/header.html' %}
         <div class="container container-login">
             <div  class="row justify-content-center">
-                <div  class="col-10">
+                <div class="col-10">
                     {% block main %}
+                    {% endblock %}
+                </div>
+                <div class="col-12">
+                    {% block overview-table %}
                     {% endblock %}
                 </div>
             </div>

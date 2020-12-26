@@ -1,6 +1,6 @@
 {% load static %}
 
-<nav class="navbar navbar-expand-lg navbar-light header">
+<nav class="navbar navbar-expand-md navbar-light header">
     <a class="navbar-brand header__title"
        href={% if not user.is_authenticated %}"/subscriptions/subscribe"
        {% else %}
@@ -49,7 +49,7 @@
             <a class="btn btn-primary header__button-signup"
                href={% url 'dfs_subscribe_list' %}><span>Get Started</span></a>
         {% else %}
-            <a class="btn btn-link header__button-login" href="/users/profile">{{ user.username }}</a>
+            <a class="btn-link header__button-login" href="/users/profile">{{ user.username }}</a>
             <a class="btn btn-link header__button-login" href="/users/logout">Logout</a>
         {% endif %}
     </div>
