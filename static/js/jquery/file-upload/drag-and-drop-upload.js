@@ -8,6 +8,7 @@ $(function () {
     dataType: 'json',
     done: function (e, data) {
       if (data.result.is_valid) {
+        // console.log(data.result['size'])
         window.location.replace('/storage/overview')
         // $("#files-list tbody").prepend(
         //   "<tr>" +

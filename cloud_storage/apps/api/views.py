@@ -4,10 +4,12 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 
 # Create your views here.
+from django.core.cache import cache
 from django.shortcuts import render
 
 from cloud_storage.apps.storage.models import File
 from cloud_storage.apps.storage.utils import beautify_size, get_used_size
+from cloud_storage.apps.storage.views import generate_cache_key, USED_SIZE_CACHE_KEY_PREFIX
 
 
 def get_all_users(request):
@@ -27,8 +29,8 @@ def get_all_users(request):
 
 
 def get_used_size_json(request):
-    files_list = File.objects.filter(user=request.user)
-    used_size = beautify_size(get_used_size(files_list))
+    used_size_cache_key = generate_cache_key(request, USED_SIZE_CACHE_KEY_PREFIX)
+    used_size = beautify_size(cache.get(used_size_cache_key))
 
     data = {
         'size': used_size

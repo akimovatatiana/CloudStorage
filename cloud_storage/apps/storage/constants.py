@@ -28,5 +28,5 @@ mime_dict = {
                      "application/vnd.ms-powerpoint.slideshow.macroEnabled.12"],
     "archive": ["application/x-freearc", "application/x-bzip", "application/x-bzip2", "application/gzip",
                 "application/java-archive", "application/vnd.rar", "application/x-tar", "application/zip",
-                "application/x-7z-compressed"]
+                "application/x-7z-compressed", "application/x-gzip"]
 }

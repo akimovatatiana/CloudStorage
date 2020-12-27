@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block col-12 %}
+    <div class="home-container">
+        <div class="home-info">
+            <h1 class="home-title">Reliable and secure storage</h1>
+            <p class="home-text">Store your files by subscription plan</p>
+        </div>
+        <div class="home-image-block">
+            <img class="home-image" src="{% static 'image/home.png' %}" />
+        </div>
+    </div>
+{% endblock %}

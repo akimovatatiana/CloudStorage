@@ -1,9 +1,12 @@
+import asyncio
 import mimetypes
 import os
 import posixpath
 import zipfile
 import json
 from math import ceil
+
+from asgiref.sync import sync_to_async
 
 from pathlib import Path
 
@@ -63,8 +66,6 @@ def generate_cache_key(request, key_prefix):
     return f'{key_prefix}:{request.session.session_key}'
 
 
-
-@login_required()
 def get_storage_capacity(request):
     user_subscription = get_user_subscription(request.user)
 
@@ -77,6 +78,7 @@ def get_storage_capacity(request):
         return capacity
 
     return 0
+
 
 # TODO: Update accuracy
 
@@ -133,10 +135,8 @@ class UploadView(View):
             return redirect('dfs_subscribe_list')
 
         data_cache_key = generate_cache_key(request, DATA_CACHE_KEY_PREFIX)
-
-        if data_cache_key in cache:
-            context = cache.get(data_cache_key)
-        else:
+        context = get_cache_or_none(request, data_cache_key)
+        if not context:
             context = self._get_context_from_db()
             cache.set(data_cache_key, context, CACHE_TTL)
 
@@ -148,10 +148,12 @@ class UploadView(View):
 
         used_size_cache_key = generate_cache_key(request, USED_SIZE_CACHE_KEY_PREFIX)
         if used_size_cache_key in cache:
-            used_size = cache.get(used_size_cache_key)
+            used_size = beautify_size(cache.get(used_size_cache_key))
         else:
-            used_size = beautify_size(get_used_size(files_list))
-            cache.set(used_size_cache_key, used_size)
+            size = get_used_size(files_list)
+            cache.set(used_size_cache_key, size)
+
+            used_size = beautify_size(size)
 
         file_filter = FileFilter(self.request.GET, queryset=files_list)
 
@@ -173,55 +175,67 @@ class UploadView(View):
 
     def post(self, request):
         data = self._form_post_request_data()
+
         form = FileForm(files=request.FILES, data=data)
 
         if form.is_valid() and space_is_available(request, request.FILES['file'].size):
             file_form = form.save()
-
+            # file_form = await form.save()
+            # asyncio.create_task()
+            #
             data_cache_key = generate_cache_key(request, DATA_CACHE_KEY_PREFIX)
             cached_files = get_cache_or_none(request, data_cache_key)
 
+            used_size_cache_key = generate_cache_key(request, USED_SIZE_CACHE_KEY_PREFIX)
+            # cached_used_size = get_cache_or_none(request, used_size_cache_key)
+            # cached_used_size = cache.get(used_size_cache_key)
+
+            cache.incr(used_size_cache_key, file_form.file.size)
+
             cached_files['files_list'] |= cached_files['files_list'].filter(pk=file_form.pk)
+            # cached_used_size += file_form.file.size
+
             cache.set(data_cache_key, cached_files)
+            # cache.set(used_size_cache_key, cached_used_size)
 
-            data = {'is_valid': True, 'name': file_form.file.name,
-                    'url': uri_to_iri(file_form.file.url)}
+            response = {'is_valid': True, 'name': file_form.file.name,
+                        'url': uri_to_iri(file_form.file.url), 'size': file_form.file.size}
         else:
-            data = {'is_valid': False}
+            response = {'is_valid': False}
 
-        return JsonResponse(data)
+        return JsonResponse(response)
 
 
 @login_required()
 def remove_file(request):
-    file_id = request.POST.get('file_id', '')
+    file_id = request.POST.get('file_id', None)
 
     data_cache_key = generate_cache_key(request, DATA_CACHE_KEY_PREFIX)
     cached_files = get_cache_or_none(request, data_cache_key)
 
-    if file_id == '':
-        files_id = json.loads(request.POST.get('files_id', ''))
+    used_size_cache_key = generate_cache_key(request, USED_SIZE_CACHE_KEY_PREFIX)
+    cached_used_size = cache.get(used_size_cache_key)
 
-        if cached_files:
-            for pk in files_id:
-                file = File.objects.get(pk=pk)
-                file.file.delete()
-                file.delete()
-                cached_files['files_list'] = cached_files['files_list'].exclude(pk=pk)
-
-        else:
-            for pk in files_id:
-                file = File.objects.get(pk=pk)
-                file.file.delete()
-                file.delete()
-    else:
+    if file_id:
         file = File.objects.get(pk=file_id)
+        cached_used_size -= file.file.size
         file.file.delete()
         file.delete()
 
-        if cached_files:
-            cached_files['files_list'] = cached_files['files_list'].exclude(pk=file_id)
-            cache.set(data_cache_key, cached_files)
+        cached_files['files_list'] = cached_files['files_list'].exclude(pk=file_id)
+    else:
+        files_id = json.loads(request.POST.get('files_id', None))
+
+        for pk in files_id:
+            file = File.objects.get(pk=pk)
+            cached_used_size -= file.file.size
+            file.file.delete()
+            file.delete()
+
+            cached_files['files_list'] = cached_files['files_list'].exclude(pk=pk)
+
+    cache.set(data_cache_key, cached_files)
+    cache.set(used_size_cache_key, cached_used_size)
 
     return redirect('overview')
 

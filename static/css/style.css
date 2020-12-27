@@ -17,6 +17,19 @@ body {
     background-color: #ffffff;
     box-shadow: 0 1px 0 0 rgba(194, 194, 194, 0.24)
 }
+@media (max-width: 1070px) {
+    .header {
+        padding-left: 70px;
+        padding-right: 70px;
+    }
+}
+
+@media (max-width: 650px) {
+    .header {
+        padding-left: 25px;
+        padding-right: 25px;
+    }
+}
 
 .header .header__title {
     margin-right: 30px;
@@ -27,6 +40,18 @@ body {
     background-position: right;
     font-size: 22px;
     font-weight: 600;
+}
+@media(max-width: 767px) {
+    .navbar-display {
+        display: flex;
+    }
+    .header-buttons {
+        display: flex;
+        flex-direction: column;
+    }
+    .header-button {
+        padding: .5rem 1rem;
+    }
 }
 
 .dropdown-toggle::after {
@@ -58,7 +83,6 @@ body {
 }
 
 .header .header__button-login {
-    margin-right: 15px;
     font-weight: 600;
     text-decoration: none;
 }
@@ -70,14 +94,6 @@ body {
 
 .header .header__links li {
     margin-right: 30px;
-}
-
-
-@media screen and (max-width: 1070px) {
-    .header {
-        padding-left: 100px;
-        padding-right: 100px;
-    }
 }
 
 .noselect {
@@ -124,6 +140,12 @@ body {
     background-color: #ffffff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     padding: 30px;
+}
+
+@media(max-width: 340px) {
+    #dfs-container .subscribe-container .plan {
+        min-width: unset;
+    }
 }
 
 #dfs-container .button-positive {
@@ -177,6 +199,8 @@ body {
 
 .login-card {
     margin: 150px auto 0 auto;
+    padding: 15px;
+    border-radius: 5px;
 }
 
 /* Sign up */
@@ -188,8 +212,8 @@ body {
 }
 
 .signup-card .signup-card__title {
-    font-size: 24px;
     text-align: center;
+    font-size: 30px;
 }
 
 
@@ -382,8 +406,8 @@ body {
 }
 
 .btn-save-changes {
-    margin-top: 30px;
-    width: 155px;
+    margin-top: 15px;
+    width: 100%;
 }
 
 .profile-button {
@@ -391,11 +415,20 @@ body {
     display: flex;
     flex-direction: row;
 }
-
-.profile-button__save {
-    margin-right: 30px;
+.profile-password-link {
+    color: #007bff !important;
+    cursor: pointer;
 }
-
+.profile-password-link:hover {
+    color: #0056b3 !important;
+    text-decoration: underline !important;
+}
+.profile-subscription-title {
+    font-size: 20px;
+}
+.profile-subscription-link {
+    margin-left: auto;
+}
 .profile-form-field__link {
     font-size: 14px;
 }
@@ -417,13 +450,30 @@ body {
     margin-top: 15px;
 }
 
+.password-title {
+    font-size: 30px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
 .profile-form__info {
-    width: 280px;
+    max-width: 300px;
+    width: 100%;
 }
 
 .profile-form__image,
 .profile-form__info {
     margin: 0 30px;
+}
+
+@media(max-width: 991px) {
+    .profile-form__info {
+        margin: 0;
+        max-width: 320px;
+    }
+    .profile-form__image {
+        margin: 0;
+    }
 }
 
 .profile-form__image {
@@ -440,13 +490,13 @@ body {
 }
 
 .profile-subscription {
-    display: flex;
-    flex-direction: column;
-    margin-top: 30px;
+    margin-top: 16px;
 }
 
 .password-block {
-    width: 310px;
+    padding: 15px;
+    background-color: #ffffff;
+    border-radius: 5px;
     margin: 50px auto 0;
 }
 
@@ -655,12 +705,21 @@ body {
 .preview-column {
     width: 100px;
 }
+
 .actions-column {
     width: 100px;
 }
+
 .filename-column {
     width: 300px;
 }
+
+@media (max-width: 991px) {
+    .filename-column {
+        width: unset;
+    }
+}
+
 @media(max-width: 767px) {
     .hidden-column {
         display: none;
@@ -669,4 +728,59 @@ body {
 
 .form-group ul {
     margin-left: 15px;
+}
+
+@media(max-width: 404px) {
+    .actions-column {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+    }
+    .i-download {
+        margin-top: 5px;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 380px) {
+    .overview-table {
+        font-size: 14px;
+    }
+    .storage-size-info {
+        font-size: 12px;
+    }
+    .search-bar-icon, .chevron-icon {
+        margin-left: 5px;
+    }
+    .overview-title {
+        font-size: 28px;
+    }
+}
+
+@media(max-width: 496px) {
+    .subscribe-list__title {
+        font-size: 46px;
+    }
+}
+
+/* Home page styles */
+.home-container {
+    margin-top: 100px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.home-title {
+    font-size: 46px;
+    font-weight: 700;
+}
+.home-text {
+    margin-top: 20px;
+    font-size: 20px;
+}
+
+.home-image {
+    width: 100%;
 }

@@ -24,7 +24,7 @@
     <script src="{% static 'js/jquery/table-actions/table-actions.js' %}"></script>
 {% endblock %}
 
-{% block overview-table %}
+{% block col-12 %}
     <div>
         <div class="drag-and-drop well text-muted text-center">
             <span class="glyphicon glyphicon-arrow-down" style="font-size: 4rem;"></span>
@@ -43,7 +43,7 @@
         </div>
 
         <div class="before-table-content noselect">
-            <h2 class="overview-text">Overview</h2>
+            <h2 class="overview-title">Overview</h2>
             <div class="storage-size-info">
                 <span class="storage-size-info-text text-muted"><span
                         class="used-size">{{ used_size }}</span> of {{ capacity }} GB used</span>
@@ -123,7 +123,7 @@
                     <td class="hidden-column type-column"><span style>{{ file.type }}</span></td>
                     <td>{{ file.size }}</td>
                     <td class="actions-column">
-                        <div>
+
                             <div class="i-delete" type="submit" data-file-id="{{ file.id }}">
                                 <i class="fa fa-trash-alt action-icon text-danger"></i>
                             </div>
@@ -133,7 +133,7 @@
                                     <i class="fa fa-download action-icon text-primary"></i>
                                 </a>
                             </div>
-                        </div>
+
                     </td>
                 </tr>
             {% empty %}

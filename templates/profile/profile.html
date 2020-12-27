@@ -9,25 +9,22 @@
         <div class="profile-form__image">
             <h1 class="profile-title">Profile</h1>
             <img class="profile-image" src="{% static 'image/default-user.png' %}"/>
+            <div class="profile-subscription">
+                {% if plan is None %}
+                    <p class="profile-subscription-title">Subscription</p>
+                    <a href="{% url 'dfs_subscribe_list' %}" class="btn btn-outline-success">Subscribe</a>
+                {% else %}
+                    <p class="profile-subscription-title"><a href="">{{ plan.plan_name }} subscription</a></p>
+                    <a class="btn btn-outline-secondary" href="{% url 'dfs_subscribe_cancel' subscription_id=subscription_id %}">Change plan</a>
+{#                    <input type="hidden" name="subscription_id" value="{{ plan.pk }}">#}
+                {% endif %}
+            </div>
         </div>
         <div class="profile-form__info">
             {% csrf_token %}
             {{ form|crispy }}
-
-            <div class="password-field">
-                <p>Password</p>
-                <a class="btn btn-outline-secondary profile-form-field__link" href="{% url 'change-password' %}">Change password</a>
-            </div>
-
-            <div>
-                {% if plan is None %}
-                    <p>Subscription</p>
-                    <a href="{% url 'dfs_subscribe_list' %}" class="btn btn-outline-success profile-form-field__link">Subscribe</a>
-                {% else %}
-                    <p><a href="">{{ plan.plan_name }} subscription</a></p>
-                    <a class="btn btn-outline-secondary profile-form-field__link" href="{% url 'dfs_subscribe_cancel' subscription_id=subscription_id %}">Change plan</a>
-{#                    <input type="hidden" name="subscription_id" value="{{ plan.pk }}">#}
-                {% endif %}
+            <div class="profile-buttons">
+                <a href="{% url 'change-password' %}" class="profile-password-link">Change password</a>
             </div>
             <div class="profile-button">
                 <button type="submit" class="btn btn-primary profile-button__save mb-4">Save changes</button>

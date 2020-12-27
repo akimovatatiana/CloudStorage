@@ -18,10 +18,13 @@ from django.conf.urls import url
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include
+from django.views.generic import TemplateView
 
 from cloud_storage import settings
 
 from cloud_storage.apps.storage.views import serve_protected_file
+
+
 
 urlpatterns = [
     url('api/', include('cloud_storage.apps.api.urls')),
@@ -30,5 +33,5 @@ urlpatterns = [
     url('users/', include('cloud_storage.apps.users.urls')),
     url('subscriptions/', include('subscriptions.urls')),
     url('storage/', include('cloud_storage.apps.storage.urls')),
-
+    url('home', TemplateView.as_view(template_name='home.html'), name='home'),
 ] + static(settings.MEDIA_URL, view=serve_protected_file, document_root=settings.MEDIA_ROOT)
