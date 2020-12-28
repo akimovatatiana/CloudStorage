@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 
-from cloud_storage.apps.storage.utils import get_upload_path
+from cloud_storage.apps.storage.models import get_upload_path
 
 
 class Migration(migrations.Migration):
