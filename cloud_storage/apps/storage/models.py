@@ -7,7 +7,9 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils.encoding import uri_to_iri
 
-from cloud_storage.apps.storage.utils import get_upload_path
+
+def get_upload_path(instance, filename):
+    return uri_to_iri(str(instance.user.id) + '/' + filename)
 
 
 class File(models.Model):

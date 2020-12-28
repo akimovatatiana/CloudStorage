@@ -1,12 +1,6 @@
-import asyncio
-import mimetypes
-import os
 import posixpath
 import zipfile
 import json
-from math import ceil
-
-from asgiref.sync import sync_to_async
 
 from pathlib import Path
 
@@ -14,36 +8,19 @@ from os.path import basename
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.core.cache import cache
-from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage, Page
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse, Http404, FileResponse, HttpResponseNotModified
 from django.utils._os import safe_join
-from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from django.utils.http import http_date
 from django.views import View
-from django.utils.encoding import uri_to_iri
-from django.views.decorators.cache import cache_page
-from django.views.decorators.csrf import csrf_protect
-from django.views.decorators.vary import vary_on_cookie
 from django.views.static import was_modified_since, directory_index
-from django_redis import get_redis_connection
 
 from .filters import FileFilter
 from .forms import FileForm
-from .utils import beautify_size, get_used_size_from_db, get_file_type, get_user_subscription_from_db, \
-    get_storage_capacity_from_db
+from .utils import *
 from .models import File
-
-from cloud_storage.apps.storage_subscriptions.models import StorageSubscription
-
-CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
-
-SUBSCRIPTION_CACHE_KEY_PREFIX = 'subscription'
-DATA_CACHE_KEY_PREFIX = 'data'
-USED_SIZE_CACHE_KEY_PREFIX = 'used_size'
 
 
 class CachedPaginator(Paginator):
@@ -52,111 +29,36 @@ class CachedPaginator(Paginator):
         return len(self.object_list)
 
 
-def flush_cache():
-    get_redis_connection('default').clear()
-
-
-def get_cache_or_none(cache_key):
-    if cache_key in cache:
-        return cache.get(cache_key)
-    else:
-        return None
-
-
-def generate_cache_key(request, key_prefix):
-    return f'{key_prefix}:{request.session.session_key}'
-
-
-# TODO: Update accuracy
-
-def space_is_available(request, size):
-    capacity = get_storage_capacity_from_db(request)
-    user_id = request.user.id
-
-    files_list = File.objects.filter(user=user_id)
-    used_size = get_used_size_from_db(files_list) / 1048576.0
-
-    formatted_size = size / 1048576.0
-    new_used_size = formatted_size + used_size
-
-    return new_used_size <= capacity
-
-
 class UploadView(View):
-    def _get_context_from_db(self):
-        user_id = self.request.user.id
-
-        files_list = File.objects.filter(user=user_id).order_by('-uploaded_at')
-        capacity = int(get_storage_capacity_from_db(self.request) / 1000)
-
-        data = {
-            'files_list': files_list,
-            'capacity': capacity,
-        }
-
-        return data
-
-    def _form_post_request_data(self):
-        title = str(self.request.FILES['file'])
-        beautified_size = beautify_size(self.request.FILES['file'].size)
-        content_type = get_file_type(self.request.FILES['file'].content_type)
-        token = self.request.POST.get('csrfmiddlewaretoken', '')
-
-        return {
-            'user': self.request.user,
-            'title': title,
-            'size': beautified_size,
-            'type': content_type,
-            'csrfmiddlewaretoken': token,
-        }
-
     def get(self, request):
-        subscription_cache_key = generate_cache_key(request, SUBSCRIPTION_CACHE_KEY_PREFIX)
-        if subscription_cache_key in cache:
-            user_subscription = cache.get(subscription_cache_key)
-        else:
-            user_subscription = get_user_subscription_from_db(request.user.id)
-            cache.set(subscription_cache_key, user_subscription)
-
+        user_subscription = get_user_subscription(request)
         if not user_subscription:
             return redirect('dfs_subscribe_list')
 
-        data_cache_key = generate_cache_key(request, DATA_CACHE_KEY_PREFIX)
-        context = get_cache_or_none(data_cache_key)
-        if not context:
-            context = self._get_context_from_db()
-            cache.set(data_cache_key, context, CACHE_TTL)
+        data = get_context(request)
 
-        files_list = context['files_list']
+        capacity = data['capacity']
 
-        # user_subscription = get_user_subscription(request.user.id)
-        # data = self._get_data_from_db()
-        # used_size = beautify_size(get_used_size(files_list))
+        files_list = data['files_list']
 
-        used_size_cache_key = generate_cache_key(request, USED_SIZE_CACHE_KEY_PREFIX)
-        if used_size_cache_key in cache:
-            used_size = beautify_size(cache.get(used_size_cache_key))
-        else:
-            size = get_used_size_from_db(files_list)
-            cache.set(used_size_cache_key, size)
-
-            used_size = beautify_size(size)
+        used_size = get_used_size(request, files_list)
 
         file_filter = FileFilter(self.request.GET, queryset=files_list)
 
         page = self.request.GET.get('page', 1)
+
         paginator = CachedPaginator(file_filter.qs, 10)
 
         try:
             files = paginator.page(page)
+
         except PageNotAnInteger:
             files = paginator.page(1)
+
         except EmptyPage:
             files = paginator.page(paginator.num_pages)
 
-        context['files'] = files
-        context['filter'] = file_filter
-        context['used_size'] = used_size
+        context = {'files': files, 'capacity': capacity, 'filter': file_filter, 'used_size': used_size}
 
         return render(self.request, 'storage/overview.html', context)
 
@@ -165,7 +67,7 @@ class UploadView(View):
 
         form = FileForm(files=request.FILES, data=data)
 
-        if form.is_valid() and space_is_available(request, request.FILES['file'].size):
+        if form.is_valid() and self._space_is_available():
             file_form = form.save()
 
             data_cache_key = generate_cache_key(request, DATA_CACHE_KEY_PREFIX)
@@ -185,13 +87,44 @@ class UploadView(View):
 
         return JsonResponse(response)
 
+    def _form_post_request_data(self):
+        title = str(self.request.FILES['file'])
 
-@login_required()
+        beautified_size = beautify_size(self.request.FILES['file'].size)
+
+        content_type = get_file_type(self.request.FILES['file'].content_type)
+
+        token = self.request.POST.get('csrfmiddlewaretoken', '')
+
+        return {
+            'user': self.request.user,
+            'title': title,
+            'size': beautified_size,
+            'type': content_type,
+            'csrfmiddlewaretoken': token,
+        }
+
+    def _space_is_available(self):
+        new_file_size = self.request.FILES['file'].size
+        capacity_in_bytes = get_storage_capacity(self.request) * 1073741824
+
+        files_list = get_files_list(self.request)
+        used_size = get_used_size(self.request, files_list, beautify=False)
+
+        new_size_in_bytes = new_file_size
+        new_used_size = new_size_in_bytes + used_size
+
+        return new_used_size <= capacity_in_bytes
+
+
+# TODO: Add permissions
+
 def remove_file(request):
     file_id = request.POST.get('file_id', None)
 
     data_cache_key = generate_cache_key(request, DATA_CACHE_KEY_PREFIX)
-    cached_files = get_cache_or_none(data_cache_key)
+    cached_data = get_cache_or_none(data_cache_key)
+    files_list = cached_data['files_list']
 
     used_size_cache_key = generate_cache_key(request, USED_SIZE_CACHE_KEY_PREFIX)
     cached_used_size = cache.get(used_size_cache_key)
@@ -202,7 +135,7 @@ def remove_file(request):
         file.file.delete()
         file.delete()
 
-        cached_files['files_list'] = cached_files['files_list'].exclude(pk=file_id)
+        cached_data['files_list'] = files_list.exclude(pk=file_id)
     else:
         files_id = json.loads(request.POST.get('files_id', None))
 
@@ -212,15 +145,14 @@ def remove_file(request):
             file.file.delete()
             file.delete()
 
-            cached_files['files_list'] = cached_files['files_list'].exclude(pk=pk)
+            cached_data['files_list'] = files_list.exclude(pk=pk)
 
-    cache.set(data_cache_key, cached_files)
+    cache.set(data_cache_key, cached_data)
     cache.set(used_size_cache_key, cached_used_size)
 
     return redirect('overview')
 
 
-@login_required()
 def download_file(request):
     user_id = request.user
     file_id = request.POST.get('file_id', '')
@@ -244,7 +176,6 @@ def download_file(request):
     return redirect('overview')
 
 
-@login_required()
 def download_compressed_files(request):
     user = request.user
     files_id = json.loads(request.POST.get('files_id', ''))
@@ -307,40 +238,16 @@ def serve_protected_file(request, path, document_root=None, show_indexes=False):
 
 @login_required()
 def get_storage_stats(request):
-    subscription_cache_key = generate_cache_key(request, SUBSCRIPTION_CACHE_KEY_PREFIX)
+    user_subscription = get_user_subscription(request)
 
-    user_subscription = get_cache_or_none(subscription_cache_key)
     if not user_subscription:
-        user_subscription = get_user_subscription_from_db(request.user.id)
+        return redirect('dfs_subscribe_list')
 
-        if not user_subscription:
-            return redirect('dfs_subscribe_list')
+    files_list = get_files_list(request)
 
-        cache.set(subscription_cache_key, user_subscription)
+    capacity = get_storage_capacity(request)
 
-    data_cache_key = generate_cache_key(request, DATA_CACHE_KEY_PREFIX)
-    context = get_cache_or_none(data_cache_key)
-
-    if not context:
-        files_list = File.objects.filter(user=request.user.id).order_by('-uploaded_at')
-        capacity = int(get_storage_capacity_from_db(request) / 1000)
-
-        data = {
-            'files_list': files_list,
-            'capacity': capacity,
-        }
-
-        cache.set(data_cache_key, data)
-    else:
-        files_list = context['files_list']
-
-    used_size_cache_key = generate_cache_key(request, USED_SIZE_CACHE_KEY_PREFIX)
-    used_size = get_cache_or_none(used_size_cache_key)
-
-    if not used_size:
-        used_size = beautify_size(get_used_size_from_db(files_list))
-    else:
-        used_size = beautify_size(used_size)
+    used_size = get_used_size(request, files_list)
 
     files_count = files_list.count()
 
@@ -364,6 +271,7 @@ def get_storage_stats(request):
     largest_file_size = beautify_size(largest_file_size)
 
     return render(request, 'storage/stats.html', {
+        'capacity': capacity,
         'used_size': used_size,
         'files_count': files_count,
         'largest_file_title': largest_file_title,
