@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load crispy_forms_filters %}
+{% load humanize %}
+{% load storage_tags %}
+
+{#<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">#}
+{#<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">#}
+
+{% block javascript %}
+    {#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>#}
+    {#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>#}
+    {#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/plug-ins/1.10.22/sorting/file-size.js"></script>#}
+
+    {#    <script src="{% static 'js/jquery/table-sorting.js' %}"></script>#}
+    <script src="{% static 'fontawesome-free-5.15.1-web/js/all.js' %}"></script>
+
+    <script src="{% static 'js/jquery/jquery-file-upload/vendor/jquery.ui.widget.js' %}"></script>
+    <script src="{% static 'js/jquery/jquery-file-upload/jquery.iframe-transport.js' %}"></script>
+    <script src="{% static 'js/jquery/jquery-file-upload/jquery.fileupload.js' %}"></script>
+
+    <script src="{% static 'js/jquery/file-upload/drag-and-drop-upload.js' %}"></script>
+    <script src="{% static 'js/jquery/table-actions/table-actions.js' %}"></script>
+{% endblock %}
+
+{% block col-12 %}
+    <div>
+        <div class="drag-and-drop well text-muted text-center">
+            <span class="glyphicon glyphicon-arrow-down" style="font-size: 4rem;"></span>
+            <h3 class="js-upload-files-text">Drop files anywhere to upload</h3>
+
+            <div class="file-upload" style="display: inline-block">
+                <span>Or upload by</span>
+                <a class="js-upload-files js-upload-files-link">
+                    <span class="glyphicon glyphicon-cloud-upload upload-link">link</span>
+                </a>
+                <input id="fileupload" type="file" name="file" multiple
+                       style="display: none;"
+                       data-url="{% url 'overview' %}"
+                       data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
+            </div>
+        </div>
+
+        <div class="before-table-content noselect">
+            <h2 class="overview-title">Overview</h2>
+            <div class="storage-size-info">
+                <span class="storage-size-info-text text-muted"><span
+                        class="used-size">{{ used_size }}</span> of {{ capacity }} GB used</span>
+                <i class="fa fa-chevron-down chevron-icon"></i>
+            </div>
+            <div class="storage-buttons">
+                <div class="delete-selected" style="display: none">
+                    <button class="btn btn-outline-danger btn-delete-selected" type="submit">Delete</button>
+                </div>
+
+                <div class="download-selected" style="display: none">
+                    <button class="btn btn-outline-primary btn-download-selected" type="submit">Download as zip</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="search-filter-content">
+            <form method="get" class="search-filter-form">
+                <div class="search-bar">
+                    <div class="search-bar-form">
+                        {{ filter.form.title|as_crispy_field }}
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary search-button">Search</button>
+                </div>
+
+                <div class="filters-bar">
+                    {{ filter.form.type|as_crispy_field }}
+                </div>
+            </form>
+        </div>
+
+        <table id="files-list" class="table table-striped overview-table">
+            <thead class="thead-light">
+            <tr>
+                <th scope="col" class="select-col">
+                    <input class="select-all" type="checkbox"/>
+                </th>
+                <th scope="col" class="hidden-column preview-column">Preview</th>
+                <th scope="col" class="filename-column"><span class="table-sortable-column-name">Filename</span></th>
+                <th scope="col"><span class="table-sortable-column-name">Uploaded</span></th>
+                <th scope="col" class="hidden-column"><span class="table-sortable-column-name">Type</span></th>
+                <th scope="col"><span class="table-sortable-column-name">Size</span></th>
+                <th scope="col" class="actions-column">Actions</th>
+            </tr>
+            </thead>
+
+            <tbody class="table-body">
+            {% csrf_token %}
+            {% for file in files %}
+                <tr class="current-file">
+                    <td class="select-col">
+                        <input type="checkbox" class='file-checkbox' value="{{ file.id }}" name="file-check"
+                               id="file-check-id">
+                    </td>
+                    <td class="hidden-column preview-column">
+                        <div class="image-wrapper" data-filepath="{{ file.file.url }}">
+                            {% if file.type == 'Image' %}
+                                <img class="image-preview" src="{{ file.file.url }}"/>
+                            {% elif file.type == 'Video' %}
+                                <img class="image-preview" src={% static '/image/video.png' %}/>
+                            {% elif file.type == 'Document' %}
+                                <img class="image-preview" src={% static '/image/doc.png' %}/>
+                            {% elif file.type == 'Table' %}
+                                <img class="image-preview" src={% static '/image/xls.png' %}/>
+                            {% elif file.type == 'Presentation' %}
+                                <img class="image-preview" src={% static '/image/ppt.png' %}/>
+                            {% elif file.type == 'Archive' %}
+                                <img class="image-preview" src={% static '/image/archive.png' %}/>
+                            {% else %}
+                                <img class="image-preview" src={% static '/image/default-file-icon.png' %}
+                            {% endif %}
+                            </div>
+                    </td>
+                    <td class="filename-column"><a href="{{ file.file.url }}"><span
+                            class="filename">{{ file.title }} {{ file.file.content_type }}</span></a></td>
+                    <td><span style>{{ file.uploaded_at|naturalday|title }}</span></td>
+                    <td class="hidden-column type-column"><span style>{{ file.type }}</span></td>
+                    <td>{{ file.size }}</td>
+                    <td class="actions-column">
+
+                            <div class="i-delete" type="submit" data-file-id="{{ file.id }}">
+                                <i class="fa fa-trash-alt action-icon text-danger"></i>
+                            </div>
+
+                            <div class="i-download">
+                                <a href="{{ file.file.url }}" download>
+                                    <i class="fa fa-download action-icon text-primary"></i>
+                                </a>
+                            </div>
+
+                    </td>
+                </tr>
+            {% empty %}
+            {% endfor %}
+            </tbody>
+        </table>
+
+
+        {% if files.has_other_pages %}
+            <nav>
+                <ul class="pagination justify-content-end">
+                    {% if files.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% url_replace request 'page' files.previous_page_number %}">Prev</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Prev</span></li>
+                    {% endif %}
+
+                    {% for i in files.paginator.page_range %}
+                        {% if files.number == i %}
+                            <li class="page-item active"><span class="page-link">{{ i }} <span class="sr-only"></span></span></li>
+                        {% elif i > files.number|add:'-5' and i < files.number|add:'5' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% url_replace request 'page' i %}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if files.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% url_replace request 'page' files.next_page_number %}">Next</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+{% endblock %}

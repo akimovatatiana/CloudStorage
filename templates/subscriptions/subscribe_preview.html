@@ -7,8 +7,8 @@
 {% block title %}Subscribe{% endblock %}
 
 {% block content %}
-    <main class="subscribe-container col-4">
-        <h1 class="display-4">Subscribe</h1>
+    <main class="subscribe-container subscribe-preview-container col-4">
+        <h2 class="h2 subscribe-preview-title">Subscribe</h2>
         <span class="subtitle mb-4">{{ plan.plan_name }}</span>
 
         <form class="subscribe-form" action="{% url 'dfs_subscribe_add' %}" method="POST">

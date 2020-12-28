@@ -13,21 +13,20 @@
         <div class="profile-form__info">
             {% csrf_token %}
             {{ form|crispy }}
-
-            <div class="password-field">
-                <p>Password</p>
-                <a class="btn btn-outline-secondary profile-form-field__link" href="{% url 'change-password' %}">Change password</a>
-            </div>
-
-            <div>
+            <div class="profile-subscription mb-3">
                 {% if plan is None %}
-                    <p>Subscription</p>
-                    <a href="{% url 'dfs_subscribe_list' %}" class="btn btn-outline-success profile-form-field__link">Subscribe</a>
+                    <p class="">Subscription</p>
+                    <a href="{% url 'dfs_subscribe_list' %}" class="btn btn-outline-success">Subscribe</a>
                 {% else %}
-                    <p><a href="">{{ plan.plan_name }} subscription</a></p>
-                    <a class="btn btn-outline-secondary profile-form-field__link" href="{% url 'dfs_subscribe_cancel' subscription_id=subscription_id %}">Change plan</a>
-{#                    <input type="hidden" name="subscription_id" value="{{ plan.pk }}">#}
+                    <p class=""><a href="">{{ plan.plan_name }} subscription</a></p>
+                    <a class="btn btn-outline-danger"
+                       href="{% url 'dfs_subscribe_cancel' subscription_id=subscription_id %}">Cancel subscription
+                    </a>
+                    <input type="hidden" name="plan_id" value="{{ plan.pk }}">
                 {% endif %}
+            </div>
+            <div class="profile-buttons">
+                <a href="{% url 'change-password' %}" class="profile-password-link">Change password</a>
             </div>
             <div class="profile-button">
                 <button type="submit" class="btn btn-primary profile-button__save mb-4">Save changes</button>

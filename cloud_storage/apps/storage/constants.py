@@ -4,7 +4,8 @@ mime_dict = {
               "image/heic"],
     "audio": ["audio/wave", "audio/wav", "audio/x-wav", "audio/x-pn-wav", "audio/webm", "audio/ogg", "audio/mpeg",
               "audio/midi", "audio/3gpp", "audio/3gpp2"],
-    "video": ["video/x-msvideo", "video/mpeg", "video/ogg", "video/mp2t", "video/webm", "video/3gpp", "video/3gpp2"],
+    "video": ["video/x-msvideo", "video/mpeg", "video/ogg", "video/mp2t", "video/webm", "video/3gpp", "video/3gpp2",
+              "video/mp4"],
     "document": ["application/msword",
                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                  "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
@@ -27,5 +28,5 @@ mime_dict = {
                      "application/vnd.ms-powerpoint.slideshow.macroEnabled.12"],
     "archive": ["application/x-freearc", "application/x-bzip", "application/x-bzip2", "application/gzip",
                 "application/java-archive", "application/vnd.rar", "application/x-tar", "application/zip",
-                "application/x-7z-compressed"]
+                "application/x-7z-compressed", "application/x-gzip"]
 }

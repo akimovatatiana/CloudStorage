@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class StorageSubscriptionsConfig(AppConfig):
-    name = 'storage_subscriptions'
+    name = 'cloud_storage.apps.storage_subscriptions'

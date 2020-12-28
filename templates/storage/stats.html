@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_filters %}
+
+{% block javascript %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+    <script>
+
+    var config = {
+      type: 'pie',
+      data: {
+        datasets: [{
+          data: {{ data|safe }},
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1,
+          label: 'File'
+        }],
+        labels: {{ labels|safe }}
+      },
+      options: {
+        responsive: true
+      }
+    };
+
+    window.onload = function() {
+      var ctx = document.getElementById('pie-chart').getContext('2d');
+      window.myPie = new Chart(ctx, config);
+    };
+    </script>
+
+{% endblock %}
+
+{% block main %}
+<div class="stats-wrapper">
+    <h2 class="mb-4">Storage Stats</h2>
+
+    {% if files_count != 0 %}
+        <p class="stats-item mb-3">Media types</p>
+        <canvas id="pie-chart"></canvas>
+
+        <div class="stats-footer">
+
+            <div class="stats-items">
+                <div class="stats-item">
+                    <span class="stats-item">Used size: </span>
+                    <span>{{ used_size }}</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-item">Files count: </span>
+                    <span>{{ files_count }}</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-item">Largest file: </span>
+                    <span><a href="#">{{ largest_file_title }}</a> ({{ largest_file_size }})</span>
+                </div>
+            </div>
+            <div class="open-storage-link"><a href="{% url 'overview' %}">Open storage</a></div>
+        </div>
+    {% else %}
+        <span class="text-muted">No files were upload. <a href="{% url 'overview' %}">Open storage</a></span>
+    {% endif %}
+</div>
+
+{% endblock %}

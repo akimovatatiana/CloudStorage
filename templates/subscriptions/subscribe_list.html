@@ -8,9 +8,9 @@
 {% block content %}
     <main class="subscribe-container">
         {% if user.is_authenticated %}
-            <h1 class="display-4">Subscription Plans</h1>
+            <h1 class="display-4 subscribe-list__title">Subscription Plans</h1>
         {% else %}
-            <h1 class="display-4">Sign Up & Subscribe</h1>
+            <h1 class="display-4 subscribe-list__title">Sign Up & Subscribe</h1>
         {% endif %}
 
         <div class="plans">
@@ -51,7 +51,7 @@
                     <input type="hidden" name="plan_name" value="{{ detail.plan.plan_name }}">
                     <input type="hidden" name="redirect_from" value="subscribe_list">
                     <button type="submit"
-                            class="btn btn-outline-success card-signup-button">
+                            class="btn btn-outline-primary card-signup-button">
                         {% if user.is_authenticated %}
                             Subscribe
                         {% else %}

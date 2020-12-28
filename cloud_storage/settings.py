@@ -39,20 +39,28 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'django_filters',
-    'rest_framework',
     'subscriptions',
     'crispy_forms',
-    'users',
-    'storage',
-    'storage_subscriptions'
+    'cloud_storage.apps.users',
+    'cloud_storage.apps.storage',
+    'cloud_storage.apps.storage_subscriptions',
+    'debug_toolbar',
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',
-        ...
-    ),
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+        "KEY_PREFIX": "redis"
+    }
 }
+
+CACHE_TTL = 60 * 15
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
@@ -64,6 +72,28 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
+
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.history.HistoryPanel',
+    'debug_toolbar.panels.versions.VersionsPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'debug_toolbar.panels.cache.CachePanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.logging.LoggingPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+    'debug_toolbar.panels.profiling.ProfilingPanel',
 ]
 
 ROOT_URLCONF = 'cloud_storage.urls'
@@ -139,15 +169,13 @@ USE_L10N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.1/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_PATH = os.path.abspath(BASE_DIR) + STATIC_URL
 STATICFILES_DIRS = [
     STATIC_PATH
 ]
 
+LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = '/users/profile/'
 LOGOUT_REDIRECT_URL = '/users/login/'
 
