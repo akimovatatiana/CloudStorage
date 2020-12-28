@@ -2,10 +2,12 @@
 
 <nav class="navbar navbar-expand-md navbar-light header">
     <a class="navbar-brand header__title"
-       href={% if not user.is_authenticated %}"/subscriptions/subscribe"
-       {% else %}
-           {% url 'overview' %}
-       {% endif %}>
+       href=
+               {% if not user.is_authenticated %}
+                   {% url 'home' %}
+               {% else %}
+                   {% url 'overview' %}
+               {% endif %}>
         Cloud Storage
     </a>
 
@@ -18,7 +20,7 @@
         <ul class="navbar-nav mr-auto header__links">
             {% if not user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Products</a>
+                    <a class="nav-link" href="{% url 'dfs_subscribe_list' %}">Plans</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Pricing</a>
@@ -50,7 +52,13 @@
                 <a class="btn btn-primary header-button header__button-signup"
                    href={% url 'dfs_subscribe_list' %}><span>Get Started</span></a>
             {% else %}
-                <a class="btn btn-link header-button header__button-login" href="/users/profile">{{ user.username }}</a>
+                <a class="btn btn-link header-button header__button-login" href="/users/profile">
+                    {% if user.first_name != '' %}
+                        {{ user.first_name }}
+                    {% else %}
+                        Profile
+                    {% endif %}
+                </a>
                 <a class="btn btn-link header-button header__button-login" href="/users/logout">Logout</a>
             {% endif %}
         </div>

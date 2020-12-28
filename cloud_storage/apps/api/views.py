@@ -8,7 +8,7 @@ from django.core.cache import cache
 from django.shortcuts import render
 
 from cloud_storage.apps.storage.models import File
-from cloud_storage.apps.storage.utils import beautify_size, get_used_size
+from cloud_storage.apps.storage.utils import beautify_size, get_used_size_from_db
 from cloud_storage.apps.storage.views import generate_cache_key, USED_SIZE_CACHE_KEY_PREFIX
 
 

@@ -10,7 +10,7 @@ from cloud_storage.apps.storage.constants import mime_dict
 from cloud_storage.apps.storage_subscriptions.models import StorageSubscription
 
 
-def get_used_size(files_list):
+def get_used_size_from_db(files_list):
     used_size = 0
     for file in files_list:
         file_path = str(settings.BASE_DIR) + uri_to_iri(file.file.url)
@@ -20,6 +20,20 @@ def get_used_size(files_list):
         used_size += size
 
     return used_size
+
+
+def get_storage_capacity_from_db(request):
+    user_subscription = get_user_subscription_from_db(request.user)
+
+    if user_subscription:
+        user_plan_id = user_subscription[0].subscription.plan_id
+
+        storage_subscriptions = StorageSubscription.objects.filter(subscription=user_plan_id)
+        capacity = storage_subscriptions[0].size
+
+        return capacity
+
+    return 0
 
 
 def get_upload_path(instance, filename):
@@ -42,12 +56,12 @@ def beautify_size(value):
     return humanize.naturalsize(value).upper()
 
 
-def get_user_subscription(user):
+def get_user_subscription_from_db(user):
     return UserSubscription.objects.get_queryset().filter(user=user)
 
 
 def get_storage_capacity(request):
-    user_subscription = get_user_subscription(request.user)
+    user_subscription = get_user_subscription_from_db(request.user)
 
     if user_subscription:
         user_plan_id = user_subscription[0].subscription.plan_id

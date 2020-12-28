@@ -9,20 +9,22 @@
         <div class="profile-form__image">
             <h1 class="profile-title">Profile</h1>
             <img class="profile-image" src="{% static 'image/default-user.png' %}"/>
-            <div class="profile-subscription">
-                {% if plan is None %}
-                    <p class="profile-subscription-title">Subscription</p>
-                    <a href="{% url 'dfs_subscribe_list' %}" class="btn btn-outline-success">Subscribe</a>
-                {% else %}
-                    <p class="profile-subscription-title"><a href="">{{ plan.plan_name }} subscription</a></p>
-                    <a class="btn btn-outline-secondary" href="{% url 'dfs_subscribe_cancel' subscription_id=subscription_id %}">Change plan</a>
-{#                    <input type="hidden" name="subscription_id" value="{{ plan.pk }}">#}
-                {% endif %}
-            </div>
         </div>
         <div class="profile-form__info">
             {% csrf_token %}
             {{ form|crispy }}
+            <div class="profile-subscription mb-3">
+                {% if plan is None %}
+                    <p class="">Subscription</p>
+                    <a href="{% url 'dfs_subscribe_list' %}" class="btn btn-outline-success">Subscribe</a>
+                {% else %}
+                    <p class=""><a href="">{{ plan.plan_name }} subscription</a></p>
+                    <a class="btn btn-outline-danger"
+                       href="{% url 'dfs_subscribe_cancel' subscription_id=subscription_id %}">Cancel subscription
+                    </a>
+                    <input type="hidden" name="plan_id" value="{{ plan.pk }}">
+                {% endif %}
+            </div>
             <div class="profile-buttons">
                 <a href="{% url 'change-password' %}" class="profile-password-link">Change password</a>
             </div>

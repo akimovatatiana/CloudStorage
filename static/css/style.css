@@ -415,22 +415,31 @@ body {
     display: flex;
     flex-direction: row;
 }
+
 .profile-password-link {
     color: #007bff !important;
     cursor: pointer;
 }
+
 .profile-password-link:hover {
     color: #0056b3 !important;
     text-decoration: underline !important;
 }
+
 .profile-subscription-title {
     font-size: 20px;
 }
+
 .profile-subscription-link {
     margin-left: auto;
 }
+
 .profile-form-field__link {
     font-size: 14px;
+}
+
+.profile-button__save {
+    width: 100%;
 }
 
 .profile-title {
@@ -509,6 +518,7 @@ body {
 }
 
 /* Subscribe preview */
+
 
 #dfs-container .subscribe-container .subscribe-form {
     padding: 1rem 0;
@@ -622,12 +632,16 @@ body {
     /*max-width: fit-content;*/
 }
 
+
 .confirmation-text {
     text-align: center;
     margin-bottom: 25px;
 }
 
 #dfs-container .subscribe-container h2 {
+    font-size: 30px;
+    text-align: center;
+    margin-bottom: 20px;
     color: #000000;
 }
 
@@ -656,6 +670,17 @@ body {
     text-decoration: underline;
 }
 
+#dfs-container .subscribe-preview-container {
+    display: flex;
+    flex-direction: column;
+    padding: 30px 30px 0 30px;
+    background-color: #ffffff;
+    border-radius: 5px;
+    min-width: 300px;
+    width: 100%;
+    max-width: 48em;
+}
+
 /* Stats styles */
 
 .stats-wrapper {
@@ -670,6 +695,10 @@ body {
 }
 .open-storage-link {
     font-size: 20px;
+}
+
+.stats-items {
+
 }
 
 .stats-item {
@@ -772,15 +801,56 @@ body {
     justify-content: space-between;
 }
 
+
+.home-info {
+    width: 300px;
+}
+
 .home-title {
     font-size: 46px;
     font-weight: 700;
 }
+
 .home-text {
     margin-top: 20px;
-    font-size: 20px;
+    font-size: 22px;
+}
+
+.home-title:hover, .home-text:hover {
+    cursor: pointer;
 }
 
 .home-image {
     width: 100%;
+}
+
+.home-button {
+    padding: .5rem 1rem;
+}
+
+.home-button-text {
+    font-size: 20px;
+}
+
+@media(max-width: 994px) {
+    .home-container {
+        flex-direction: column;
+    }
+
+    .home-info {
+        width: 80%;
+        margin: auto;
+    }
+
+    .home-image {
+        display: inherit;
+        margin: 50px auto;
+        width: 500px;
+    }
+}
+
+@media(max-width: 550px) {
+        .home-image {
+        width: 300px;
+    }
 }

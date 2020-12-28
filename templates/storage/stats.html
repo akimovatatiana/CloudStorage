@@ -47,28 +47,33 @@
 
 {% block main %}
 <div class="stats-wrapper">
-    <h2>Storage Stats</h2>
+    <h2 class="mb-4">Storage Stats</h2>
 
-    <canvas id="pie-chart"></canvas>
+    {% if files_count != 0 %}
+        <p class="stats-item mb-3">Media types</p>
+        <canvas id="pie-chart"></canvas>
 
-    <div class="stats-footer">
+        <div class="stats-footer">
 
-        <div class="stats-items">
-            <div>
-                <span class="stats-item">Used size: </span>
-                <span>{{ used_size }}</span>
+            <div class="stats-items">
+                <div class="stats-item">
+                    <span class="stats-item">Used size: </span>
+                    <span>{{ used_size }}</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-item">Files count: </span>
+                    <span>{{ files_count }}</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-item">Largest file: </span>
+                    <span><a href="#">{{ largest_file_title }}</a> ({{ largest_file_size }})</span>
+                </div>
             </div>
-            <div>
-                <span class="stats-item">Files count: </span>
-                <span>{{ files_count }}</span>
-            </div>
-            <div>
-                <span class="stats-item">Largest file: </span>
-                <span><a href="#">{{ largest_file_title }}</a> ({{ largest_file_size }})</span>
-            </div>
+            <div class="open-storage-link"><a href="{% url 'overview' %}">Open storage</a></div>
         </div>
-        <div class="open-storage-link"><a href="{% url 'overview' %}">Open storage</a></div>
-    </div>
+    {% else %}
+        <span class="text-muted">No files were upload. <a href="{% url 'overview' %}">Open storage</a></span>
+    {% endif %}
 </div>
 
 {% endblock %}

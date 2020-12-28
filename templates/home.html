@@ -5,8 +5,11 @@
 {% block col-12 %}
     <div class="home-container">
         <div class="home-info">
-            <h1 class="home-title">Reliable and secure storage</h1>
-            <p class="home-text">Store your files by subscription plan</p>
+            <h1 class="home-title noselect">Reliable and secure storage</h1>
+            <p class="home-text noselect text-secondary">Store your files by subscription plan with easy of use.
+                Subscribe and get started with Cloud Storage</p>
+            <a class="btn btn-primary home-button"
+                   href={% url 'dfs_subscribe_list' %}><span class="home-button-text">Get Started</span></a>
         </div>
         <div class="home-image-block">
             <img class="home-image" src="{% static 'image/home.png' %}" />
