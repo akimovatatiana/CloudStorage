@@ -1,3 +1,4 @@
+from django.utils.decorators import method_decorator
 from django.views import View
 
 from .forms import *
@@ -10,6 +11,8 @@ from django.shortcuts import render, redirect
 
 from subscriptions.models import UserSubscription, SubscriptionPlan
 from subscriptions import views as sub_views
+
+from ..storage.utils import get_user_subscription
 
 
 class SignUpView(View):
@@ -44,36 +47,65 @@ class SignUpView(View):
         return render(self.request, 'registration/signup.html', {'form': form, 'plan_id': plan_id})
 
 
-@login_required
-def profile(request):
-    user = User.objects.get(pk=request.user.pk)
-    user_subscription = UserSubscription.objects.get_queryset().filter(user=user)
+class ProfileView(View):
+    @method_decorator(login_required())
+    def get(self, request):
+        context = self._get_subscription_data(request)
 
-    if user_subscription:
-        subscription = user_subscription[0]
+        form = UserUpdateForm(instance=request.user)
 
-        user_plan = subscription.subscription.plan
+        context['form'] = form
 
-        user_subscription_id = subscription.pk
+        return render(request, 'profile/profile.html', context)
 
-    else:
-        user_plan = None
+    @method_decorator(login_required())
+    def post(self, request):
+        context = self._get_subscription_data(request)
 
-        user_subscription_id = None
-
-    if request.method == 'POST':
         form = UserUpdateForm(request.POST, instance=request.user)
+
+        context['form'] = form
 
         if form.is_valid():
             form.save()
 
             return redirect('profile')
 
-    else:
-        form = UserUpdateForm(instance=request.user)
+        return render(request, 'profile/profile.html', context)
 
-    return render(request, 'profile/profile.html', {'form': form, 'plan': user_plan,
-                                                    'subscription_id': user_subscription_id})
+    def _get_subscription_data(self, request):
+        user_subscription = get_user_subscription(self.request)
+        user_plan = None
+        subscription_id = None
+
+        if user_subscription:
+            user_plan = user_subscription[0].subscription.plan
+            subscription_id = user_subscription[0].pk
+
+        return {'plan': user_plan, 'subscription_id': subscription_id}
+
+
+class ChangePasswordView(View):
+    @method_decorator(login_required())
+    def get(self, request):
+        form = PasswordChangeForm(user=request.user)
+
+        return render(request, 'profile/change-password.html', {'form': form})
+
+    @method_decorator(login_required())
+    def post(self, request):
+        form = PasswordChangeForm(data=request.POST, user=request.user)
+
+        if form.is_valid():
+            form.save()
+
+            update_session_auth_hash(request, form.user)
+
+            return redirect('profile')
+
+        # return redirect('change-password')
+        return render(self.request, 'profile/change-password.html', {'form': form})
+
 
 
 @login_required
