@@ -9,7 +9,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.shortcuts import render, redirect
 
-from subscriptions.models import UserSubscription, SubscriptionPlan
+from subscriptions.models import SubscriptionPlan
 from subscriptions import views as sub_views
 
 from ..storage.utils import get_user_subscription
@@ -103,27 +103,4 @@ class ChangePasswordView(View):
 
             return redirect('profile')
 
-        # return redirect('change-password')
         return render(self.request, 'profile/change-password.html', {'form': form})
-
-
-
-@login_required
-def change_password(request):
-    if request.method == 'POST':
-        form = PasswordChangeForm(data=request.POST, user=request.user)
-
-        if form.is_valid():
-            form.save()
-
-            update_session_auth_hash(request, form.user)
-
-            return redirect('profile')
-
-        else:
-            return redirect('change-password')
-
-    else:
-        form = PasswordChangeForm(user=request.user)
-
-    return render(request, 'profile/change-password.html', {'form': form})
