@@ -38,9 +38,17 @@ body {
     background-image: url(../../static/image/cloud.png);
     background-repeat: no-repeat;
     background-position: right;
+    /*font-size: 22px;*/
+    /*font-weight: 600;*/
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 22px;
-    font-weight: 600;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 700;
+    line-height: 26px;
 }
+
+
 @media(max-width: 767px) {
     .navbar-display {
         display: flex;
@@ -200,10 +208,6 @@ body {
     margin: 150px auto 0 auto;
     padding: 15px;
     border-radius: 5px;
-}
-
-.form-card {
-    padding: 30px;
 }
 
 /* Sign up */
@@ -891,4 +895,8 @@ body {
         .home-image {
         width: 300px;
     }
+}
+
+.form-card {
+    padding: 30px;
 }
