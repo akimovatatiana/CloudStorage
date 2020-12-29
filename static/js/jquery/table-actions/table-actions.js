@@ -113,34 +113,41 @@ $(function () {
         }
 
         if (res) {
-            $.ajaxSetup({
+            $.ajax({
+                type: 'DELETE',
+                url: '/storage/overview/',
                 data: {files_id: JSON.stringify(files_id_to_delete), csrfmiddlewaretoken: getCookie("csrftoken")},
-                headers: {"X-CSRFToken": getCookie("csrftoken")}
+                headers: {"X-CSRFToken": getCookie("csrftoken")},
+                success: function(result) {
+                    update_used_size()
+
+                    for (var i = 0; i < checked_inputs.length; i++) {
+                        checked_inputs[i].closest('tr').remove();
+                    }
+
+                    setSelectAllStateButton()
+                }
             });
-
-            $.post("/storage/remove-file", function (result) {
-                update_used_size()
-            });
-
-            setSelectAllStateButton()
-
-            for (var i = 0; i < checked_inputs.length; i++) {
-                checked_inputs[i].closest('tr').remove();
-            }
         }
     });
 
-    $(".i-delete").click(function () {
+    $(".delete-single").click(function (e) {
         let res = confirm("Are you sure you want to delete these product?")
 
         if (res) {
-            let file_id = $($(this)[0]).data('file-id')
+            let file_id = $($(this)[0]).data('files-id')
+            let table_row =  $(this).closest('tr')
 
-            $.post("/storage/remove-file", { file_id: file_id, csrfmiddlewaretoken: getCookie("csrftoken") }, function (result) {
-                update_used_size()
+            $.ajax({
+                type: 'DELETE',
+                url: '/storage/overview/',
+                data: {files_id: JSON.stringify(file_id), csrfmiddlewaretoken: getCookie("csrftoken")},
+                headers: {"X-CSRFToken": getCookie("csrftoken")},
+                success: function(result) {
+                    table_row.remove()
+                    update_used_size()
+                }
             });
-
-            $(this).closest('tr').remove();
         }
     });
 
@@ -154,7 +161,7 @@ $(function () {
 
         $.ajax({
             type: 'POST',
-            url: "/storage/download-selected-files",
+            url: "/storage/download-compressed-files",
             data: {files_id: JSON.stringify(files_id_to_download), csrfmiddlewaretoken: getCookie("csrftoken")},
             headers: {"X-CSRFToken": getCookie("csrftoken")},
             xhrFields:{
