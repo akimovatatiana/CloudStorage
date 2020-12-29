@@ -20,27 +20,28 @@ class SignUpView(View):
         return render(self.request, 'registration/signup.html', {'form': form, 'plan_id': plan_id})
 
     def post(self, request):
-        form = UserSignUpForm()
-        plan_id = request.POST.get('plan_id', '')
-
+        plan_id = self.request.POST.get('plan_id', '')
         plan = SubscriptionPlan.objects.filter(pk=plan_id)
+
         redirect_from = self.request.POST.get('redirect_from', '')
 
+        form = UserSignUpForm()
+
         if plan and redirect_from == 'signup':
-            form = UserSignUpForm(request.POST)
+            form = UserSignUpForm(self.request.POST)
 
             if form.is_valid():
                 form.save()
+
                 username = form.cleaned_data.get('username')
                 raw_password = form.cleaned_data.get('password1')
                 user = authenticate(username=username, password=raw_password)
 
-                login(request, user)
+                login(self.request, user)
 
-                return sub_views.SubscribeView.as_view()(request)
+                return sub_views.SubscribeView.as_view()(self.request)
 
-        else:
-            return render(self.request, 'registration/signup.html', {'form': form, 'plan_id': plan_id})
+        return render(self.request, 'registration/signup.html', {'form': form, 'plan_id': plan_id})
 
 
 @login_required
@@ -50,10 +51,14 @@ def profile(request):
 
     if user_subscription:
         subscription = user_subscription[0]
+
         user_plan = subscription.subscription.plan
+
         user_subscription_id = subscription.pk
+
     else:
         user_plan = None
+
         user_subscription_id = None
 
     if request.method == 'POST':
@@ -78,7 +83,9 @@ def change_password(request):
 
         if form.is_valid():
             form.save()
+
             update_session_auth_hash(request, form.user)
+
             return redirect('profile')
 
         else:
