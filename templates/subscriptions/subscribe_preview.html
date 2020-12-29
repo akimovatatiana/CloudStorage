@@ -7,7 +7,7 @@
 {% block title %}Subscribe{% endblock %}
 
 {% block content %}
-    <main class="subscribe-container subscribe-preview-container col-4">
+    <main class="subscribe-container subscribe-preview-container col-4 form-card">
         <h2 class="h2 subscribe-preview-title">Subscribe</h2>
         <span class="subtitle mb-4">{{ plan.plan_name }}</span>
 
@@ -22,7 +22,7 @@
                 <div class="mt-3 mb-4">
                 {% include 'subscriptions/snippets/payment_details.html' with form=payment_form %}
 </div>
-                <button type="submit" class="btn btn-success">Confirm order</button>
+                <button type="submit" class="btn btn-success w-100">Confirm order</button>
             </div>
         </form>
     </main>

@@ -8,7 +8,7 @@
 {% block main %}
     <form method="post">
         {% csrf_token %}
-        <div class="signup-card col-7">
+        <div class="signup-card col-7 form-card">
             <h2 class="signup-card__title">Sign up</h2>
             {{ form|crispy }}
             <input type="hidden" name="plan_id" value={{ plan_id }}>

@@ -1,3 +1,6 @@
+# Sources of downloaded JS/CSS frameworks
+jquery-3.5.1.min.js
+bootstrap*/
 
 # Created by https://www.toptal.com/developers/gitignore/api/pycharm,django,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=pycharm,django,python

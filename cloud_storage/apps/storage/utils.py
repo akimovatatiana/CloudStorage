@@ -30,25 +30,25 @@ def generate_cache_key(request, key_prefix):
     return f'{key_prefix}:{request.session.session_key}'
 
 
-def get_context(request):
+def get_storage_data(request):
     data_cache_key = generate_cache_key(request, DATA_CACHE_KEY_PREFIX)
-    context = get_cache_or_none(data_cache_key)
+    data = get_cache_or_none(data_cache_key)
 
-    if not context:
-        context = get_context_from_db(request)
-        cache.set(data_cache_key, context, CACHE_TTL)
+    if not data:
+        data = get_storage_data_from_db(request)
+        cache.set(data_cache_key, data, CACHE_TTL)
 
-    return context
+    return data
 
 
 def get_files_list(request):
-    context = get_context(request)
+    context = get_storage_data(request)
 
     return context['files_list']
 
 
 def get_storage_capacity(request):
-    context = get_context(request)
+    context = get_storage_data(request)
 
     return context['capacity']
 
@@ -86,7 +86,21 @@ def get_files_list_from_db(request, sorted_by='-uploaded_at'):
     return File.objects.filter(user=request.user.id).order_by(sorted_by)
 
 
-def get_context_from_db(request):
+def get_storage_capacity_from_db(request):
+    user_subscription = get_user_subscription_from_db(request.user)
+
+    if user_subscription:
+        user_plan_id = user_subscription[0].subscription.plan_id
+
+        storage_subscriptions = StorageSubscription.objects.filter(subscription=user_plan_id)
+        capacity = storage_subscriptions[0].size
+
+        return capacity
+
+    return 0
+
+
+def get_storage_data_from_db(request):
     user_id = request.user.id
 
     files_list = File.objects.filter(user=user_id).order_by('-uploaded_at')
@@ -112,18 +126,8 @@ def get_used_size_from_db(files_list):
     return used_size
 
 
-def get_storage_capacity_from_db(request):
-    user_subscription = get_user_subscription_from_db(request.user)
-
-    if user_subscription:
-        user_plan_id = user_subscription[0].subscription.plan_id
-
-        storage_subscriptions = StorageSubscription.objects.filter(subscription=user_plan_id)
-        capacity = storage_subscriptions[0].size
-
-        return capacity
-
-    return 0
+def get_user_subscription_from_db(user):
+    return UserSubscription.objects.get_queryset().filter(user=user)
 
 
 def get_mime_file_type(url):
@@ -140,7 +144,3 @@ def get_file_type(content_type):
 
 def beautify_size(value):
     return humanize.naturalsize(value).upper()
-
-
-def get_user_subscription_from_db(user):
-    return UserSubscription.objects.get_queryset().filter(user=user)

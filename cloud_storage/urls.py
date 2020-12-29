@@ -23,15 +23,14 @@ from django.views.generic import TemplateView
 from cloud_storage import settings
 
 from cloud_storage.apps.storage.views import serve_protected_file
-
-
+from cloud_storage.views import HomeView
 
 urlpatterns = [
-    url('api/', include('cloud_storage.apps.api.urls')),
-    url('__debug__/', include(debug_toolbar.urls)),
-    url('admin/', admin.site.urls),
-    url('users/', include('cloud_storage.apps.users.urls')),
-    url('subscriptions/', include('subscriptions.urls')),
-    url('storage/', include('cloud_storage.apps.storage.urls')),
-    url('home', TemplateView.as_view(template_name='home.html'), name='home'),
-] + static(settings.MEDIA_URL, view=serve_protected_file, document_root=settings.MEDIA_ROOT)
+                  url('api/', include('cloud_storage.apps.api.urls')),
+                  url('__debug__/', include(debug_toolbar.urls)),
+                  url('admin/', admin.site.urls),
+                  url('users/', include('cloud_storage.apps.users.urls')),
+                  url('subscriptions/', include('subscriptions.urls')),
+                  url('storage/', include('cloud_storage.apps.storage.urls')),
+                  url('home', HomeView.as_view(), name='home'),
+              ] + static(settings.MEDIA_URL, view=serve_protected_file, document_root=settings.MEDIA_ROOT)
