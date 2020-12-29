@@ -39,7 +39,6 @@ class StorageView(View):
         data = get_storage_data(self.request)
 
         capacity = data['capacity']
-
         files_list = data['files_list']
 
         used_size = get_used_size(self.request, files_list)
@@ -47,7 +46,6 @@ class StorageView(View):
         file_filter = FileFilter(self.request.GET, queryset=files_list)
 
         page = self.request.GET.get('page', 1)
-
         paginator = CachedPaginator(file_filter.qs, 10)
 
         try:
@@ -84,6 +82,7 @@ class StorageView(View):
 
             response = {'is_valid': True, 'name': file_form.file.name,
                         'url': uri_to_iri(file_form.file.url), 'size': file_form.file.size}
+
         else:
             response = {'is_valid': False}
 

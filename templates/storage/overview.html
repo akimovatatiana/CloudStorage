@@ -5,15 +5,7 @@
 {% load humanize %}
 {% load storage_tags %}
 
-{#<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">#}
-{#<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">#}
-
 {% block javascript %}
-    {#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>#}
-    {#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>#}
-    {#    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/plug-ins/1.10.22/sorting/file-size.js"></script>#}
-
-    {#    <script src="{% static 'js/jquery/table-sorting.js' %}"></script>#}
     <script src="{% static 'fontawesome-free-5.15.1-web/js/all.js' %}"></script>
 
     <script src="{% static 'js/jquery/jquery-file-upload/vendor/jquery.ui.widget.js' %}"></script>
@@ -70,7 +62,13 @@
                 </div>
 
                 <div class="filters-bar">
-                    {{ filter.form.type|as_crispy_field }}
+                    <div class="filters-bar-item">
+                        {{ filter.form.uploaded_at|as_crispy_field }}
+                    </div>
+
+                    <div class="filters-bar-item">
+                        {{ filter.form.type|as_crispy_field }}
+                    </div>
                 </div>
             </form>
         </div>
@@ -91,53 +89,58 @@
             </thead>
 
             <tbody class="table-body">
-            {% csrf_token %}
-            {% for file in files %}
-                <tr class="current-file">
-                    <td class="select-col">
-                        <input type="checkbox" class='file-checkbox' value="{{ file.id }}" name="file-check"
-                               id="file-check-id">
-                    </td>
-                    <td class="hidden-column preview-column">
-                        <div class="image-wrapper" data-filepath="{{ file.file.url }}">
-                            {% if file.type == 'Image' %}
-                                <img class="image-preview" src="{{ file.file.url }}"/>
-                            {% elif file.type == 'Video' %}
-                                <img class="image-preview" src={% static '/image/video.png' %}/>
-                            {% elif file.type == 'Document' %}
-                                <img class="image-preview" src={% static '/image/doc.png' %}/>
-                            {% elif file.type == 'Table' %}
-                                <img class="image-preview" src={% static '/image/xls.png' %}/>
-                            {% elif file.type == 'Presentation' %}
-                                <img class="image-preview" src={% static '/image/ppt.png' %}/>
-                            {% elif file.type == 'Archive' %}
-                                <img class="image-preview" src={% static '/image/archive.png' %}/>
-                            {% else %}
-                                <img class="image-preview" src={% static '/image/default-file-icon.png' %}
-                            {% endif %}
-                            </div>
-                    </td>
-                    <td class="filename-column"><a href="{{ file.file.url }}"><span
-                            class="filename">{{ file.title }} {{ file.file.content_type }}</span></a></td>
-                    <td><span style>{{ file.uploaded_at|naturalday|title }}</span></td>
-                    <td class="hidden-column type-column"><span style>{{ file.type }}</span></td>
-                    <td>{{ file.size }}</td>
-                    <td class="actions-column">
+                {% csrf_token %}
+                {% for file in files %}
+                    <tr class="current-file">
+                        <td class="select-col">
+                            <input type="checkbox" class='file-checkbox' value="{{ file.id }}" name="file-check"
+                                   id="file-check-id">
+                        </td>
+                        <td class="hidden-column preview-column">
+                            <div class="image-wrapper" data-filepath="{{ file.file.url }}">
+                                {% if file.type == 'Image' %}
+                                    <img class="image-preview" src="{{ file.file.url }}"/>
+                                {% elif file.type == 'Video' %}
+                                    <img class="image-preview" src={% static '/image/video.png' %}/>
+                                {% elif file.type == 'Document' %}
+                                    <img class="image-preview" src={% static '/image/doc.png' %}/>
+                                {% elif file.type == 'Table' %}
+                                    <img class="image-preview" src={% static '/image/xls.png' %}/>
+                                {% elif file.type == 'Presentation' %}
+                                    <img class="image-preview" src={% static '/image/ppt.png' %}/>
+                                {% elif file.type == 'Archive' %}
+                                    <img class="image-preview" src={% static '/image/archive.png' %}/>
+                                {% else %}
+                                    <img class="image-preview" src={% static '/image/default-file-icon.png' %}
+                                {% endif %}
+                                </div>
+                        </td>
+                        <td class="filename-column">
+                            <a href="{{ file.file.url }}">
+                                <span class="filename">{{ file.title }} {{ file.file.content_type }}</span>
+                            </a>
+                        </td>
+                        <td>
+                            <span style>{{ file.uploaded_at|naturalday|title }}</span>
+                        </td>
+                        <td class="hidden-column type-column">
+                            <span style>{{ file.type }}</span>
+                        </td>
+                        <td>{{ file.size }}</td>
+                        <td class="actions-column">
+                                <div class="delete-single" type="submit" data-files-id="{{ file.id }}">
+                                    <i class="fa fa-trash-alt action-icon text-danger"></i>
+                                </div>
 
-                            <div class="i-delete" type="submit" data-file-id="{{ file.id }}">
-                                <i class="fa fa-trash-alt action-icon text-danger"></i>
-                            </div>
-
-                            <div class="i-download">
-                                <a href="{{ file.file.url }}" download>
-                                    <i class="fa fa-download action-icon text-primary"></i>
-                                </a>
-                            </div>
-
-                    </td>
-                </tr>
-            {% empty %}
-            {% endfor %}
+                                <div class="download-single">
+                                    <a href="{{ file.file.url }}" download>
+                                        <i class="fa fa-download action-icon text-primary"></i>
+                                    </a>
+                                </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                {% endfor %}
             </tbody>
         </table>
 

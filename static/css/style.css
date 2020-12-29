@@ -133,9 +133,8 @@ body {
 
 #dfs-container .subscribe-container .plan {
     min-width: 320px;
-    min-height: 540px;
-    margin-left: 15px;
-    margin-right: 15px;
+    min-height: 470px;
+    margin-left: 20px;
     border: none;
     background-color: #ffffff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -203,10 +202,14 @@ body {
     border-radius: 5px;
 }
 
+.form-card {
+    padding: 30px;
+}
+
 /* Sign up */
 .signup-card {
     margin: 20px auto;
-    padding: 15px;
+    /*padding: 15px;*/
     background-color: #ffffff;
     border-radius: 5px;
 }
@@ -219,6 +222,9 @@ body {
 
 /* Storage Upload */
 
+.file-upload > span:hover {
+    cursor: default;
+}
 
 .file-checkbox:hover, .select-all:hover, .js-upload-files-link {
     cursor: pointer;
@@ -277,7 +283,37 @@ body {
 
 .filters-bar {
     display: inline-flex;
+    /*width: 300px;*/
     margin-left: auto;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.filters-bar-item:first-child {
+    margin-right: 15px;
+}
+
+.filters-bar-item:last-child {
+    width: 169px;
+}
+
+/*.filters-bar-item > div > div > select {*/
+/*    width: 200px;*/
+/*}*/
+
+@media (max-width: 767px) {
+    .filters-bar {
+        width: 150px;
+    }
+
+    .filters-bar, .search-bar {
+        flex-direction: column;
+    }
+
+    .search-button {
+        width: 50%;
+        margin: 0;
+    }
 }
 
 .filter-button {
@@ -311,11 +347,11 @@ body {
     font-weight: bold;
 }
 
-.i-delete {
+.delete-single {
     display: inline;
 }
 
-.i-download {
+.download-single {
     display: inline;
     margin-left: 15%;
 }
@@ -598,6 +634,12 @@ body {
     font-weight: 400;
 }
 
+.subscribe-list__title {
+    font-size: 46px;
+    font-weight: 700;
+}
+
+
 #dfs-container .subscribe-container .form-field-label {
     font-size: 1rem;
     font-weight: 400;
@@ -766,7 +808,7 @@ body {
         width: 100%;
         text-align: center;
     }
-    .i-download {
+    .download-single {
         margin-top: 5px;
         margin-left: 0;
     }
@@ -814,10 +856,6 @@ body {
 .home-text {
     margin-top: 20px;
     font-size: 22px;
-}
-
-.home-title:hover, .home-text:hover {
-    cursor: pointer;
 }
 
 .home-image {
