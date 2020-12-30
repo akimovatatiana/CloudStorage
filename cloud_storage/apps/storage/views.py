@@ -41,7 +41,7 @@ class StorageView(View):
         capacity = data['capacity']
         files_list = data['files_list']
 
-        used_size = get_used_size(self.request, files_list)
+        used_size = get_used_size(self.request)
 
         file_filter = FileFilter(self.request.GET, queryset=files_list)
 
@@ -143,7 +143,7 @@ class StorageView(View):
         capacity_in_bytes = get_storage_capacity(self.request) * 1073741824
 
         files_list = get_files_list(self.request)
-        used_size = get_used_size(self.request, files_list, beautify=False)
+        used_size = get_used_size(self.request, beautify=False)
 
         new_size_in_bytes = new_file_size
         new_used_size = new_size_in_bytes + used_size
@@ -162,7 +162,7 @@ class StorageStatsView(View):
 
         capacity = get_storage_capacity(self.request)
 
-        used_size = get_used_size(self.request, files_list)
+        used_size = get_used_size(self.request)
 
         files_count = files_list.count()
 

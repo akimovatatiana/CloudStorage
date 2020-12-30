@@ -65,12 +65,13 @@ def get_user_subscription(request):
     return user_subscription
 
 
-def get_used_size(request, files_list, beautify=True):
+def get_used_size(request, beautify=True):
     used_size_cache_key = generate_cache_key(request, USED_SIZE_CACHE_KEY_PREFIX)
     if used_size_cache_key in cache:
         used_size = cache.get(used_size_cache_key)
 
     else:
+        files_list = get_files_list(request)
         size = get_used_size_from_db(files_list)
         cache.set(used_size_cache_key, size)
 
