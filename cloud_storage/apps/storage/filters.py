@@ -18,10 +18,12 @@ class FileFilter(django_filters.FilterSet):
     title = django_filters.CharFilter(label="", lookup_expr='icontains',
                                       widget=forms.TextInput(attrs={'autocomplete': 'off'}))
     type = django_filters.ChoiceFilter(label="", empty_label="All Types", choices=TYPE_CHOICES)
-    uploaded_at = django_filters.OrderingFilter(
+    sorter = django_filters.OrderingFilter(
         choices=(
             ('-uploaded_at', 'Newest'),
             ('uploaded_at', 'Oldest'),
+            ('-byte_size', 'Largest'),
+            ('byte_size', 'Smallest'),
         ),
 
         label="",
@@ -31,5 +33,5 @@ class FileFilter(django_filters.FilterSet):
 
     class Meta:
         model = File
-        fields = ['title', 'type', 'uploaded_at']
+        fields = ['title', 'type', 'uploaded_at', 'byte_size']
         exclude = ['user', 'file']

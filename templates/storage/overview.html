@@ -63,7 +63,7 @@
 
                 <div class="filters-bar">
                     <div class="filters-bar-item">
-                        {{ filter.form.uploaded_at|as_crispy_field }}
+                        {{ filter.form.sorter|as_crispy_field }}
                     </div>
 
                     <div class="filters-bar-item">
@@ -126,7 +126,7 @@
                         <td class="hidden-column type-column">
                             <span style>{{ file.type }}</span>
                         </td>
-                        <td>{{ file.size }}</td>
+                        <td>{{ file.beautified_size }}</td>
                         <td class="actions-column">
                                 <div class="delete-single" type="submit" data-files-id="{{ file.id }}">
                                     <i class="fa fa-trash-alt action-icon text-danger"></i>

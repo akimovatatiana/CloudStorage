@@ -124,7 +124,7 @@ class StorageView(View):
     def _form_post_request_data(self):
         title = str(self.request.FILES['file'])
 
-        beautified_size = beautify_size(self.request.FILES['file'].size)
+        byte_size = self.request.FILES['file'].size
 
         content_type = get_file_type(self.request.FILES['file'].content_type)
 
@@ -133,7 +133,7 @@ class StorageView(View):
         return {
             'user': self.request.user,
             'title': title,
-            'size': beautified_size,
+            'byte_size': byte_size,
             'type': content_type,
             'csrfmiddlewaretoken': token,
         }
