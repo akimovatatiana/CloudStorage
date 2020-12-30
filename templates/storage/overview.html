@@ -150,16 +150,16 @@
                 <ul class="pagination justify-content-end">
                     {% if files.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?{% url_replace request 'page' files.previous_page_number %}">Prev</a>
+                            <a class="page-link" href="?{% url_replace request 'page' files.previous_page_number %}">&laquo;</a>
                         </li>
                     {% else %}
-                        <li class="page-item disabled"><span class="page-link">Prev</span></li>
+                        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
                     {% endif %}
 
                     {% for i in files.paginator.page_range %}
                         {% if files.number == i %}
                             <li class="page-item active"><span class="page-link">{{ i }} <span class="sr-only"></span></span></li>
-                        {% elif i > files.number|add:'-5' and i < files.number|add:'5' %}
+                        {% elif i > files.number|add:'-10' and i < files.number|add:'10' %}
                             <li class="page-item">
                                 <a class="page-link" href="?{% url_replace request 'page' i %}">{{ i }}</a>
                             </li>
@@ -168,7 +168,7 @@
 
                     {% if files.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?{% url_replace request 'page' files.next_page_number %}">Next</a>
+                            <a class="page-link" href="?{% url_replace request 'page' files.next_page_number %}">&raquo;</a>
                         </li>
                     {% else %}
                         <li class="page-item disabled"><span class="page-link">Next</span></li>
