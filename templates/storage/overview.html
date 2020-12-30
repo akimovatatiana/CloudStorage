@@ -63,7 +63,7 @@
 
                 <div class="filters-bar">
                     <div class="filters-bar-item">
-                        {{ filter.form.sorter|as_crispy_field }}
+                        {{ filter.form.sorted_by|as_crispy_field }}
                     </div>
 
                     <div class="filters-bar-item">
@@ -117,16 +117,16 @@
                         </td>
                         <td class="filename-column">
                             <a href="{{ file.file.url }}">
-                                <span class="filename">{{ file.title }} {{ file.file.content_type }}</span>
+                                <span class="filename-title">{{ file.title }} {{ file.file.content_type }}</span>
                             </a>
                         </td>
                         <td>
-                            <span style>{{ file.uploaded_at|naturalday|title }}</span>
+                            <span class="table-column-title">{{ file.uploaded_at|naturalday|title }}</span>
                         </td>
                         <td class="hidden-column type-column">
-                            <span style>{{ file.type }}</span>
+                            <span class="file-type-title"><a href="?type={{ file.type }}">{{ file.type }}</a></span>
                         </td>
-                        <td>{{ file.beautified_size }}</td>
+                        <td><span class="table-column-title">{{ file.beautified_size }}</span></td>
                         <td class="actions-column">
                                 <div class="delete-single" type="submit" data-files-id="{{ file.id }}">
                                     <i class="fa fa-trash-alt action-icon text-danger"></i>
@@ -150,10 +150,10 @@
                 <ul class="pagination justify-content-end">
                     {% if files.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?{% url_replace request 'page' files.previous_page_number %}">&laquo;</a>
+                            <a class="page-link" href="?{% url_replace request 'page' files.previous_page_number %}">Prev</a>
                         </li>
                     {% else %}
-                        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                        <li class="page-item disabled"><span class="page-link">Prev</span></li>
                     {% endif %}
 
                     {% for i in files.paginator.page_range %}
@@ -168,7 +168,7 @@
 
                     {% if files.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?{% url_replace request 'page' files.next_page_number %}">&raquo;</a>
+                            <a class="page-link" href="?{% url_replace request 'page' files.next_page_number %}">Next</a>
                         </li>
                     {% else %}
                         <li class="page-item disabled"><span class="page-link">Next</span></li>

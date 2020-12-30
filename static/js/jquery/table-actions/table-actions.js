@@ -2,7 +2,7 @@ $(function () {
     window.onload = function() {
         let search_bar_value = $.trim($(".search-bar-form > div > div > input").val())
         let file_type_select = $("select[name='type'][id='id_type'] > option:selected").text()
-        let files_sort_select = $("select[name='sorter'][id='id_sorter'] > option:selected").text()
+        let files_sort_select = $("select[name='sorted_by'][id='id_sorted_by'] > option:selected").text()
 
         if (search_bar_value.length === 0 && file_type_select === "All Types" && files_sort_select === "Newest") {
             return

@@ -38,14 +38,8 @@ body {
     background-image: url(../../static/image/cloud.png);
     background-repeat: no-repeat;
     background-position: right;
-    /*font-size: 22px;*/
-    /*font-weight: 600;*/
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 22px;
-    font-style: normal;
-    font-variant: normal;
-    font-weight: 700;
-    line-height: 26px;
+    font-weight: 500;
 }
 
 
@@ -226,6 +220,11 @@ body {
 
 /* Storage Upload */
 
+.file-upload {
+    font-weight: 300;
+    font-size: 16px;
+}
+
 .file-upload > span:hover {
     cursor: default;
 }
@@ -245,6 +244,7 @@ body {
 
 .js-upload-files-text {
     cursor: default;
+    font-weight: 300;
 }
 
 .before-table-content {
@@ -301,6 +301,10 @@ body {
     width: 169px;
 }
 
+.filters-bar-item > div > div > select {
+    font-weight: 300;
+}
+
 /*.filters-bar-item > div > div > select {*/
 /*    width: 200px;*/
 /*}*/
@@ -336,7 +340,7 @@ body {
 }
 
 .storage-size-info {
-    margin-left: 5%;
+    margin-left: 35px;
     display: inline-flex;
 }
 
@@ -349,6 +353,7 @@ body {
     /*cursor: default;*/
     color: #495057;
     font-weight: bold;
+    font-size: 16px;
 }
 
 .delete-single {
@@ -785,8 +790,25 @@ body {
     width: 100px;
 }
 
+.filename-title {
+    font-weight: 300;
+}
+
 .filename-column {
     width: 300px;
+}
+
+.table-column-title {
+    color: #495057;
+    font-weight: 300;
+}
+
+.file-type-title {
+    font-weight: 300;
+}
+
+.table .thead-light th {
+    font-weight: 500;
 }
 
 @media (max-width: 991px) {
@@ -837,6 +859,11 @@ body {
     .subscribe-list__title {
         font-size: 46px;
     }
+}
+
+.page-link {
+    font-weight: 300;
+    border: none;
 }
 
 /* Home page styles */

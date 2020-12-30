@@ -11,6 +11,7 @@ TYPE_CHOICES = (
     ('Document', 'Document'),
     ('Table', 'Table Sheet'),
     ('Presentation', 'Presentation'),
+    ('Archive', 'Archive'),
 )
 
 
@@ -18,7 +19,7 @@ class FileFilter(django_filters.FilterSet):
     title = django_filters.CharFilter(label="", lookup_expr='icontains',
                                       widget=forms.TextInput(attrs={'autocomplete': 'off'}))
     type = django_filters.ChoiceFilter(label="", empty_label="All Types", choices=TYPE_CHOICES)
-    sorter = django_filters.OrderingFilter(
+    sorted_by = django_filters.OrderingFilter(
         choices=(
             ('-uploaded_at', 'Newest'),
             ('uploaded_at', 'Oldest'),
