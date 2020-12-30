@@ -1,27 +1,30 @@
 $(function () {
-    // $(document).ready(function() {
-    //     let doc_extension = ['docx', 'doc']
-    //     $('.image-wrapper').each(function(position, image_wrapper) {
-    //         let full_path = $(image_wrapper).data('filepath')
-    //         let extension = full_path.split(/[#?]/)[0].split('.').pop().trim()
-    //         let image_preview = $(image_wrapper).find('.image-preview')[0]
-    //
-    //         if (doc_extension.includes(extension)) {
-    //             // let media_path = full_path.split(/[#?]/)[0].split('/').slice(0, 3).join('/')
-    //             $(image_preview).attr('src', '/static/image/doc.png')
-    //         }
-    //     });
-    // });
-
     window.onload = function() {
         let search_bar_value = $.trim($(".search-bar-form > div > div > input").val())
-        let select_value = $("select[name='type'] > option:selected").text()
+        let file_type_select = $("select[name='type'][id='id_type'] > option:selected").text()
+        let files_sort_select = $("select[name='sorter'][id='id_sorter'] > option:selected").text()
 
-        if (search_bar_value.length === 0 && select_value === "All Types") {
+        if (search_bar_value.length === 0 && file_type_select === "All Types" && files_sort_select === "Newest") {
             return
         }
 
         showSearchFilterContent()
+    }
+
+    function showSearchFilterContent() {
+        let search_filter_content = $("div[class='search-filter-content']")[0];
+        let icon = $(".chevron-icon")
+
+        icon.removeClass('fa-chevron-down').addClass('fa-chevron-up')
+        search_filter_content.style.display = 'block';
+    }
+
+    function hideSearchFilterContent() {
+        let search_filter_content = $("div[class='search-filter-content']")[0];
+        let icon = $(".chevron-icon")
+
+        icon.removeClass('fa-chevron-up').addClass('fa-chevron-down')
+        search_filter_content.style.display = 'none';
     }
 
     function getCookie(c_name) {
@@ -176,22 +179,6 @@ $(function () {
             }
         })
     });
-
-    function showSearchFilterContent() {
-        let search_filter_content = $("div[class='search-filter-content']")[0];
-        let icon = $(".chevron-icon")
-
-        icon.removeClass('fa-chevron-down').addClass('fa-chevron-up')
-        search_filter_content.style.display = 'block';
-    }
-
-    function hideSearchFilterContent() {
-        let search_filter_content = $("div[class='search-filter-content']")[0];
-        let icon = $(".chevron-icon")
-
-        icon.removeClass('fa-chevron-up').addClass('fa-chevron-down')
-        search_filter_content.style.display = 'none';
-    }
 
     $(".before-table-content").click(function(e) {
         let search_filter_content = $("div[class='search-filter-content']")[0];
