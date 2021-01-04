@@ -34,9 +34,11 @@ def get_used_size_json(request):
         used_size = beautify_size(cache.get(used_size_cache_key))
     else:
         files_list = get_files_list(request)
-        used_size = beautify_size(get_used_size_from_db(files_list))
 
-        cache.set(used_size_cache_key, used_size)
+        used_size_bytes = get_used_size_from_db(files_list)
+        cache.set(used_size_cache_key, used_size_bytes)
+
+        used_size = beautify_size(used_size_bytes)
 
     data = {
         'size': used_size

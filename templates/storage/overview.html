@@ -159,7 +159,7 @@
                     {% for i in files.paginator.page_range %}
                         {% if files.number == i %}
                             <li class="page-item active"><span class="page-link">{{ i }} <span class="sr-only"></span></span></li>
-                        {% elif i > files.number|add:'-10' and i < files.number|add:'10' %}
+                        {% elif i > files.number|add:'-5' and i < files.number|add:'5' %}
                             <li class="page-item">
                                 <a class="page-link" href="?{% url_replace request 'page' i %}">{{ i }}</a>
                             </li>

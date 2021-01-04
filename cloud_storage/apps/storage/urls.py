@@ -5,8 +5,6 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from cloud_storage import settings
 from cloud_storage.apps.storage import views as storage_views
 
-CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
-
 urlpatterns = [
     url('overview/', storage_views.StorageView.as_view(), name='overview'),
     url('stats/', storage_views.StorageStatsView.as_view(), name='stats'),

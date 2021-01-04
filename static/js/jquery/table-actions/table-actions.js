@@ -92,7 +92,6 @@ $(function () {
 
     function update_used_size() {
         $.post("/api/used-size", { csrfmiddlewaretoken: getCookie("csrftoken") }, function (result) {
-            // let used_size = Number((result["size"]).toFixed(2));
             let used_size = result["size"]
 
             $("span[class='used-size']").text(used_size);

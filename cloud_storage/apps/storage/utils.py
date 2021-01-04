@@ -27,7 +27,7 @@ def get_cache_or_none(cache_key):
 
 
 def generate_cache_key(request, key_prefix):
-    return f'{key_prefix}:{request.session.session_key}'
+    return f'{key_prefix}:{request.user.id}'
 
 
 def get_storage_data(request):
@@ -36,7 +36,7 @@ def get_storage_data(request):
 
     if not data:
         data = get_storage_data_from_db(request)
-        cache.set(data_cache_key, data, CACHE_TTL)
+        cache.set(data_cache_key, data)
 
     return data
 
@@ -48,9 +48,17 @@ def get_files_list(request):
 
 
 def get_storage_capacity(request):
-    context = get_storage_data(request)
+    user_subscription = get_user_subscription(request)
+    capacity = 0
 
-    return context['capacity']
+    if user_subscription:
+        user_plan_id = user_subscription[0].subscription.plan_id
+
+        storage_subscription = StorageSubscription.objects.filter(subscription=user_plan_id)[0]
+
+        capacity = int(storage_subscription.size) / 1000
+
+    return capacity
 
 
 def get_user_subscription(request):
@@ -60,13 +68,17 @@ def get_user_subscription(request):
         user_subscription = cache.get(subscription_cache_key)
     else:
         user_subscription = get_user_subscription_from_db(request.user.id)
-        cache.set(subscription_cache_key, user_subscription)
+        if user_subscription:
+            cache.set(subscription_cache_key, user_subscription)
+        else:
+            return None
 
     return user_subscription
 
 
 def get_used_size(request, beautify=True):
     used_size_cache_key = generate_cache_key(request, USED_SIZE_CACHE_KEY_PREFIX)
+
     if used_size_cache_key in cache:
         used_size = cache.get(used_size_cache_key)
 

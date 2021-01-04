@@ -22,11 +22,25 @@ from .forms import FileForm
 from .utils import *
 from .models import File
 
+# CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
+
 
 class CachedPaginator(Paginator):
     @cached_property
     def count(self):
-        return len(self.object_list)
+        return self.object_list.count()
+
+    def __len__(self):
+        return self.object_list.count()
+
+    def page(self, number):
+        """Return a Page object for the given 1-based page number."""
+        number = self.validate_number(number)
+        bottom = (number - 1) * self.per_page
+        top = bottom + self.per_page
+        if top + self.orphans >= self.count:
+            top = self.count
+        return self._get_page(self.object_list[bottom:top], number, self)
 
 
 class StorageView(View):
@@ -46,6 +60,7 @@ class StorageView(View):
         file_filter = FileFilter(self.request.GET, queryset=files_list)
 
         page = self.request.GET.get('page', 1)
+
         paginator = CachedPaginator(file_filter.qs, 10)
 
         try:
@@ -89,10 +104,9 @@ class StorageView(View):
         return JsonResponse(response)
 
     def delete(self, request):
-        data_cache_key = generate_cache_key(self.request, DATA_CACHE_KEY_PREFIX)
-        cached_data = get_cache_or_none(data_cache_key)
+        data = get_storage_data(self.request)
 
-        files_list = cached_data['files_list']
+        files_list = data['files_list']
 
         used_size_cache_key = generate_cache_key(self.request, USED_SIZE_CACHE_KEY_PREFIX)
         cached_used_size = cache.get(used_size_cache_key)
@@ -109,12 +123,13 @@ class StorageView(View):
                 file.file.delete()
                 file.delete()
 
-                cached_data['files_list'] = files_list.exclude(pk=file_id)
+                data['files_list'] = files_list.exclude(pk=file_id)
 
             else:
                 raise Http404
 
-        cache.set(data_cache_key, cached_data)
+        data_cache_key = generate_cache_key(self.request, DATA_CACHE_KEY_PREFIX)
+        cache.set(data_cache_key, data)
         cache.set(used_size_cache_key, cached_used_size)
 
         response = HttpResponse({'success': 'OK'})
@@ -142,7 +157,6 @@ class StorageView(View):
         new_file_size = self.request.FILES['file'].size
         capacity_in_bytes = get_storage_capacity(self.request) * 1073741824
 
-        files_list = get_files_list(self.request)
         used_size = get_used_size(self.request, beautify=False)
 
         new_size_in_bytes = new_file_size
