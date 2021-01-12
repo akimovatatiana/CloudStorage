@@ -42,24 +42,6 @@ $(function () {
         return "";
     }
 
-    function getCheckedCount() {
-        return $('input[type="checkbox"][class="file-checkbox"]:checked').length
-    }
-
-    function setSelectAllStateButton() {
-        $('.delete-selected').css('display', 'none')
-        $(".select-all")[0].checked = false;
-
-        $('.download-selected').css('display', 'none')
-    }
-
-    function setUnselectAllStateButton() {
-        $('.delete-selected').css('display', 'inline-block')
-        $(".select-all")[0].checked = true;
-
-        $('.download-selected').css('display', 'inline-block')
-    }
-
     $(".select-all").click(function () {
         let checkboxes_count = $('input[type="checkbox"][class="file-checkbox"]').length
         let checked_count = getCheckedCount()
@@ -80,6 +62,24 @@ $(function () {
         }
     });
 
+    function getCheckedCount() {
+        return $('input[type="checkbox"][class="file-checkbox"]:checked').length
+    }
+
+    function setSelectAllStateButton() {
+        $('.delete-selected').css('display', 'none')
+        $(".select-all")[0].checked = false;
+
+        $('.download-selected').css('display', 'none')
+    }
+
+    function setUnselectAllStateButton() {
+        $('.delete-selected').css('display', 'inline-block')
+        $(".select-all")[0].checked = true;
+
+        $('.download-selected').css('display', 'inline-block')
+    }
+
     $(".file-checkbox").click(function() {
         let checked_count = getCheckedCount()
 
@@ -89,14 +89,6 @@ $(function () {
             setSelectAllStateButton()
         }
     });
-
-    function update_used_size() {
-        $.post("/api/used-size", { csrfmiddlewaretoken: getCookie("csrftoken") }, function (result) {
-            let used_size = result["size"]
-
-            $("span[class='used-size']").text(used_size);
-        }, "json")
-    }
 
     $(".delete-selected").click(function () {
         let checked_inputs = $("input[type='checkbox'][class='file-checkbox']:checked");
@@ -132,6 +124,14 @@ $(function () {
             });
         }
     });
+
+    function update_used_size() {
+        $.post("/api/used-size", { csrfmiddlewaretoken: getCookie("csrftoken") }, function (result) {
+            let used_size = result["size"]
+
+            $("span[class='used-size']").text(used_size);
+        }, "json")
+    }
 
     $(".delete-single").click(function (e) {
         let res = confirm("Are you sure you want to delete these product?")
