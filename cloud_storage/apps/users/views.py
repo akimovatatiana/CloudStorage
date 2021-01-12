@@ -50,19 +50,19 @@ class SignUpView(View):
 class ProfileView(View):
     @method_decorator(login_required())
     def get(self, request):
-        context = self._get_subscription_data(request)
+        context = self._get_subscription_data(self.request)
 
-        form = UserUpdateForm(instance=request.user)
+        form = UserUpdateForm(instance=self.request.user)
 
         context['form'] = form
 
-        return render(request, 'profile/profile.html', context)
+        return render(self.request, 'profile/profile.html', context)
 
     @method_decorator(login_required())
     def post(self, request):
-        context = self._get_subscription_data(request)
+        context = self._get_subscription_data(self.request)
 
-        form = UserUpdateForm(request.POST, instance=request.user)
+        form = UserUpdateForm(self.request.POST, instance=self.request.user)
 
         context['form'] = form
 
@@ -71,7 +71,7 @@ class ProfileView(View):
 
             return redirect('profile')
 
-        return render(request, 'profile/profile.html', context)
+        return render(self.request, 'profile/profile.html', context)
 
     def _get_subscription_data(self, request):
         user_subscription = get_user_subscription(self.request)
@@ -88,18 +88,18 @@ class ProfileView(View):
 class ChangePasswordView(View):
     @method_decorator(login_required())
     def get(self, request):
-        form = PasswordChangeForm(user=request.user)
+        form = PasswordChangeForm(user=self.request.user)
 
-        return render(request, 'profile/change-password.html', {'form': form})
+        return render(self.request, 'profile/change-password.html', {'form': form})
 
     @method_decorator(login_required())
     def post(self, request):
-        form = PasswordChangeForm(data=request.POST, user=request.user)
+        form = PasswordChangeForm(data=self.request.POST, user=self.request.user)
 
         if form.is_valid():
             form.save()
 
-            update_session_auth_hash(request, form.user)
+            update_session_auth_hash(self.request, form.user)
 
             return redirect('profile')
 

@@ -12,6 +12,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage, Page
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse, Http404, FileResponse, HttpResponseNotModified, QueryDict
 from django.utils._os import safe_join
+from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from django.utils.http import http_date
 from django.views import View
@@ -33,20 +34,19 @@ class CachedPaginator(Paginator):
 
 
 class StorageView(View):
+    @method_decorator(login_required())
     def get(self, request):
-        user_subscription = get_user_subscription(self.request)
+        subscription_data = get_subscription_data(self.request)
 
-        if not user_subscription:
+        if not subscription_data:
             return redirect('dfs_subscribe_list')
 
-        data = get_storage_data(self.request)
+        capacity = subscription_data['capacity']
 
-        capacity = data['capacity']
-        files_list = data['files_list']
-
+        user_files = get_user_files(self.request)
         used_size = get_used_size(self.request)
 
-        file_filter = FileFilter(self.request.GET, queryset=files_list)
+        file_filter = FileFilter(self.request.GET, queryset=user_files)
 
         page = self.request.GET.get('page', 1)
 
@@ -61,10 +61,16 @@ class StorageView(View):
         except EmptyPage:
             files = paginator.page(paginator.num_pages)
 
-        context = {'files': files, 'capacity': capacity, 'filter': file_filter, 'used_size': used_size}
+        context = {
+            'files': files,
+            'capacity': capacity,
+            'filter': file_filter,
+            'used_size': used_size
+        }
 
         return render(self.request, 'storage/overview.html', context)
 
+    @method_decorator(login_required())
     def post(self, request):
         data = self._form_post_request_data()
 
@@ -74,31 +80,29 @@ class StorageView(View):
             file_form = form.save()
 
             # Update storage data cache
-            data = get_storage_data(self.request)
-            data['files_list'] |= data['files_list'].filter(pk=file_form.pk)
+            user_files = get_user_files(self.request)
+            user_files |= user_files.filter(pk=file_form.pk)
 
-            data_cache_key = generate_cache_key(self.request, DATA_CACHE_KEY_PREFIX)
-            cache.set(data_cache_key, data)
+            user_files_cache_key = generate_cache_key(self.request, USER_FILES_CACHE_KEY_PREFIX)
+            cache.set(user_files_cache_key, user_files, CACHE_TTL)
 
             # Update storage used size cache
             used_size_cache_key = generate_cache_key(self.request, USED_SIZE_CACHE_KEY_PREFIX)
             cache.incr(used_size_cache_key, file_form.file.size)
 
-            response = {'is_valid': True, 'name': file_form.file.name,
-                        'url': uri_to_iri(file_form.file.url), 'size': file_form.file.size}
+            response = {'is_valid': True}
 
         else:
             response = {'is_valid': False}
 
         return JsonResponse(response)
 
+    @method_decorator(login_required())
     def delete(self, request):
-        data = get_storage_data(self.request)
-
-        files_list = data['files_list']
+        user_files = get_user_files(self.request)
 
         used_size_cache_key = generate_cache_key(self.request, USED_SIZE_CACHE_KEY_PREFIX)
-        cached_used_size = cache.get(used_size_cache_key)
+        used_size = get_used_size(self.request, beautify=False)
 
         request_data = QueryDict(self.request.body).get('files_id')
 
@@ -108,18 +112,19 @@ class StorageView(View):
             file = File.objects.get(pk=file_id, user=self.request.user)
 
             if file:
-                cached_used_size -= file.file.size
+                used_size -= file.file.size
                 file.file.delete()
                 file.delete()
 
-                data['files_list'] = files_list.exclude(pk=file_id)
+                user_files = user_files.exclude(pk=file_id)
 
             else:
                 raise Http404
 
-        data_cache_key = generate_cache_key(self.request, DATA_CACHE_KEY_PREFIX)
-        cache.set(data_cache_key, data)
-        cache.set(used_size_cache_key, cached_used_size)
+        user_files_cache_key = generate_cache_key(self.request, USER_FILES_CACHE_KEY_PREFIX)
+        cache.set(user_files_cache_key, user_files, CACHE_TTL)
+
+        cache.set(used_size_cache_key, used_size, CACHE_TTL)
 
         response = HttpResponse({'success': 'OK'})
 
@@ -134,13 +139,15 @@ class StorageView(View):
 
         token = self.request.POST.get('csrfmiddlewaretoken', '')
 
-        return {
+        post_request_data = {
             'user': self.request.user,
             'title': title,
             'byte_size': byte_size,
             'type': content_type,
             'csrfmiddlewaretoken': token,
         }
+
+        return post_request_data
 
     def _space_is_available(self):
         new_file_size = self.request.FILES['file'].size
@@ -155,26 +162,26 @@ class StorageView(View):
 
 
 class StorageStatsView(View):
+    @method_decorator(login_required())
     def get(self, request):
-        user_subscription = get_user_subscription(self.request)
+        subscription_data = get_subscription_data(request)
 
-        if not user_subscription:
+        if not subscription_data:
             return redirect('dfs_subscribe_list')
 
-        files_list = get_files_list(self.request)
+        capacity = subscription_data['capacity']
 
-        capacity = get_storage_capacity(self.request)
-
+        user_files = get_user_files(self.request)
         used_size = get_used_size(self.request)
 
-        files_count = files_list.count()
+        files_count = user_files.count()
 
         largest_file_size = 0
         largest_file_title = ""
 
         types_dict = {}
 
-        for file in files_list:
+        for file in user_files:
             size = file.file.size
 
             if size > largest_file_size:
@@ -189,7 +196,7 @@ class StorageStatsView(View):
 
         largest_file_size = beautify_size(largest_file_size)
 
-        return render(request, 'storage/stats.html', {
+        return render(self.request, 'storage/stats.html', {
             'capacity': capacity,
             'used_size': used_size,
             'files_count': files_count,
@@ -200,28 +207,7 @@ class StorageStatsView(View):
         })
 
 
-def download_file(request):
-    file_id = request.POST.get('file_id', '')
-    user_file = File.objects.get(pk=file_id, user=request.user)
-
-    if user_file:
-        file_path = uri_to_iri(user_file.file.path)
-
-        if os.path.exists(file_path):
-            with open(file_path, 'rb') as file:
-                filename = user_file.file.name
-
-                response = HttpResponse(file.read(), content_type="application/octet-stream")
-                response['Content-Disposition'] = 'attachment; filename=' + filename
-                response['X-Sendfile'] = file_path
-
-                return response
-
-        raise Http404
-
-    return redirect('overview')
-
-
+@login_required()
 def download_compressed_files(request):
     user = request.user
     files_id = json.loads(request.POST.get('files_id', ''))

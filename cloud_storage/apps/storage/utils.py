@@ -14,8 +14,8 @@ from cloud_storage.apps.storage_subscriptions.models import StorageSubscription
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-SUBSCRIPTION_CACHE_KEY_PREFIX = 'subscription'
-DATA_CACHE_KEY_PREFIX = 'data'
+SUBSCRIPTION_DATA_CACHE_KEY_PREFIX = 'subscription_data'
+USER_FILES_CACHE_KEY_PREFIX = 'user_files'
 USED_SIZE_CACHE_KEY_PREFIX = 'used_size'
 
 
@@ -30,77 +30,58 @@ def generate_cache_key(request, key_prefix):
     return f'{key_prefix}:{request.user.id}'
 
 
-def get_storage_data(request):
-    data_cache_key = generate_cache_key(request, DATA_CACHE_KEY_PREFIX)
-    data = get_cache_or_none(data_cache_key)
+def get_user_files(request):
+    user_files_cache_key = generate_cache_key(request, USER_FILES_CACHE_KEY_PREFIX)
+    user_files = get_cache_or_none(user_files_cache_key)
 
-    if not data:
-        data = get_storage_data_from_db(request)
-        cache.set(data_cache_key, data)
+    if not user_files:
+        user_files = get_user_files_from_db(request)
+        cache.set(user_files_cache_key, user_files, CACHE_TTL)
 
-    return data
-
-
-def get_files_list(request):
-    context = get_storage_data(request)
-
-    return context['files_list']
+    return user_files
 
 
-def get_storage_capacity(request):
-    user_subscription = get_user_subscription(request)
-    capacity = 0
-
-    if user_subscription:
-        user_plan_id = user_subscription[0].subscription.plan_id
-
-        storage_subscription = StorageSubscription.objects.filter(subscription=user_plan_id)[0]
-
-        capacity = int(storage_subscription.size) / 1000
-
-    return capacity
-
-
-def get_user_subscription(request):
-    subscription_cache_key = generate_cache_key(request, SUBSCRIPTION_CACHE_KEY_PREFIX)
-
-    if subscription_cache_key in cache:
-        user_subscription = cache.get(subscription_cache_key)
-    else:
-        user_subscription = get_user_subscription_from_db(request.user.id)
-        if user_subscription:
-            cache.set(subscription_cache_key, user_subscription)
-        else:
-            return None
-
-    return user_subscription
-
-
-def get_used_size(request, beautify=True):
-    used_size_cache_key = generate_cache_key(request, USED_SIZE_CACHE_KEY_PREFIX)
-
-    if used_size_cache_key in cache:
-        used_size = cache.get(used_size_cache_key)
-
-    else:
-        files_list = get_files_list(request)
-        size = get_used_size_from_db(files_list)
-        cache.set(used_size_cache_key, size)
-
-        used_size = size
-
-    if beautify:
-        used_size = beautify_size(used_size)
-
-    return used_size
-
-
-def get_files_list_from_db(request, sorted_by='-uploaded_at'):
+def get_user_files_from_db(request, sorted_by='-uploaded_at'):
     return File.objects.filter(user=request.user.id).order_by(sorted_by)
 
 
+def get_subscription_data(request):
+    subscription_cache_key = generate_cache_key(request, SUBSCRIPTION_DATA_CACHE_KEY_PREFIX)
+    subscription_data = get_cache_or_none(subscription_cache_key)
+
+    if not subscription_data:
+        user_subscription = get_user_subscription_from_db(request)
+        capacity = get_storage_capacity_from_db(request)
+
+        if user_subscription and capacity:
+            subscription_data = {
+                'subscription': user_subscription,
+                'capacity': capacity
+            }
+
+            cache.set(subscription_cache_key, subscription_data, CACHE_TTL)
+
+    return subscription_data
+
+
+def get_user_subscription(request):
+    subscription_data = get_subscription_data(request)
+
+    return subscription_data['subscription'] if subscription_data else None
+
+
+def get_user_subscription_from_db(request):
+    return UserSubscription.objects.get_queryset().filter(user=request.user)
+
+
+def get_storage_capacity(request):
+    subscription_data = get_subscription_data(request)
+
+    return subscription_data['capacity'] if subscription_data else 0
+
+
 def get_storage_capacity_from_db(request):
-    user_subscription = get_user_subscription_from_db(request.user)
+    user_subscription = get_user_subscription_from_db(request)
 
     if user_subscription:
         user_plan_id = user_subscription[0].subscription.plan_id
@@ -113,34 +94,33 @@ def get_storage_capacity_from_db(request):
     return 0
 
 
-def get_storage_data_from_db(request):
-    user_id = request.user.id
+def get_used_size(request, beautify=True):
+    used_size_cache_key = generate_cache_key(request, USED_SIZE_CACHE_KEY_PREFIX)
+    used_size = get_cache_or_none(used_size_cache_key)
 
-    files_list = File.objects.filter(user=user_id).order_by('-uploaded_at')
-    capacity = int(get_storage_capacity_from_db(request) / 1000)
+    if not used_size:
+        used_size = get_used_size_from_db(request)
+        cache.set(used_size_cache_key, used_size, CACHE_TTL)
 
-    data = {
-        'files_list': files_list,
-        'capacity': capacity,
-    }
-
-    return data
+    return beautify_size(used_size) if beautify else used_size
 
 
-def get_used_size_from_db(files_list):
+def get_used_size_from_db(request):
+    user_files = get_user_files_from_db(request)
     used_size = 0
-    for file in files_list:
+
+    for file in user_files:
         file_path = str(settings.BASE_DIR) + uri_to_iri(file.file.url)
 
         size = os.path.getsize(file_path)
 
         used_size += size
 
-    return used_size
+    return int(used_size)
 
 
-def get_user_subscription_from_db(user):
-    return UserSubscription.objects.get_queryset().filter(user=user)
+def beautify_size(value):
+    return humanize.naturalsize(value).upper()
 
 
 def get_mime_file_type(url):
@@ -154,6 +134,3 @@ def get_file_type(content_type):
 
     return content_type
 
-
-def beautify_size(value):
-    return humanize.naturalsize(value).upper()
